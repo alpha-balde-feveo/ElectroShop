@@ -9,6 +9,9 @@ import productRoutes from "./routes/products";
 import path from "path";
 import uploadRoutes from "./routes/upload";
 import promoRoutes from "./routes/promo";
+import orderRoutes from "./routes/orders";
+import adminStatsRoutes from "./routes/adminStats";
+
 
 
 
@@ -28,6 +31,9 @@ app.use("/api/products", productRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
 app.use("/api/upload", uploadRoutes);
 app.use("/api/promo", promoRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/admin/stats", adminStatsRoutes);
+
 
 
 
@@ -51,4 +57,17 @@ async function bootstrap() {
 bootstrap().catch((err) => {
   console.error("Fatal startup error:", err);
   process.exit(1);
+});
+
+// 404 JSON
+app.use((req, res) => {
+  res.status(404).json({ message: "Not Found", path: req.path });
+});
+
+// Global error handler
+app.use((err: any, _req: any, res: any, _next: any) => {
+  if (err?.issues) {
+    return res.status(400).json({ message: "Validation error", issues: err.issues });
+  }
+  res.status(500).json({ message: err?.message ?? "Server error" });
 });

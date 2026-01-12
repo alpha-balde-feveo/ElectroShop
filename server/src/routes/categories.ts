@@ -12,13 +12,22 @@ router.get("/", async (_req, res) => {
 });
 
 router.post("/", adminAuth, async (req, res) => {
-  const schema = z.object({ name: z.string().min(2) });
+  const schema = z.object({
+    name: z.string().min(2)
+  });
+
+  // 🔎 DEBUG TEMPORAIRE
+  console.log("HEADERS:", req.headers["content-type"]);
+  console.log("BODY:", req.body);
+
   const { name } = schema.parse(req.body);
 
   const slug = slugify(name);
-
-  const existing = await CategoryModel.findOne({ slug });
-  if (existing) return res.status(409).json({ message: "Category already exists" });
+  const exists = await CategoryModel.findOne({ slug });
+  if (exists) {
+    res.status(409).json({ message: "Category already exists" });
+    return;
+  }
 
   const created = await CategoryModel.create({ name, slug });
   res.status(201).json(created);
