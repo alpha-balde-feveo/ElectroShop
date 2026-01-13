@@ -11,7 +11,7 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    return res.status(400).json({ message: "email and password are required" });
+    return res.status(400).json({ message: "email et password sont obligatoires" });
   }
 
   const admin = await AdminUserModel.findOne({ email: email.toLowerCase() });

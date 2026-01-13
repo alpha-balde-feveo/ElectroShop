@@ -1,0 +1,14 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# deps
+COPY package*.json ./
+RUN npm install
+
+# source (sera overwrite par le volume en dev)
+COPY . .
+
+EXPOSE 4000
+
+CMD ["npm", "run", "dev"]

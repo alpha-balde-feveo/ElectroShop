@@ -1,0 +1,25 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: electroshop-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: electroshop-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
