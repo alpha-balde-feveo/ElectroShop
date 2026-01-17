@@ -1,6 +1,9 @@
 import type { AxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/http";
+import type React from "react";
+
+
 
 export type Product = {
   _id: string;
@@ -153,47 +156,110 @@ export default function Shop() {
   );
 }
 
+import {
+  ShoppingCart,
+  Heart,
+  Facebook,
+  Twitter,
+} from "lucide-react";
+
 function ProductCard({ p }: { p: Product }) {
   const raw = p.imageUrl || p.images?.[0];
   const img = buildImageUrl(raw);
 
   return (
-    <div className="group bg-white rounded-2xl border shadow-sm overflow-hidden">
-      <div className="relative aspect-square bg-gray-100">
-        <img src={img} alt={p.name} className="h-full w-full object-cover" />
+    <div className="bg-white border rounded-2xl overflow-hidden shadow-sm">
+      {/* Image */}
+      <div className="group relative aspect-square bg-gray-100 overflow-hidden">
+        <img
+          src={img}
+          alt={p.name}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
 
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/50" />
 
-        <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
-          <button
-            type="button"
-            className="h-10 w-10 rounded-full bg-white shadow grid place-items-center"
-            aria-label="Add to wishlist"
-          >
-            ❤
-          </button>
-          <button
-            type="button"
-            className="h-10 w-10 rounded-full bg-white shadow grid place-items-center"
-            aria-label="Quick view"
-          >
-            👁
-          </button>
+        {/* Center icons */}
+        <div className="pointer-events-none absolute inset-0 grid place-items-center">
+          <div className="pointer-events-auto flex items-center gap-3 opacity-0 translate-y-2 transition duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+            <IconBtn label="Add to cart">
+              <ShoppingCart size={20} />
+            </IconBtn>
+
+            <IconBtn label="Wishlist">
+              <Heart size={20} />
+            </IconBtn>
+
+            <IconBtn label="Share Facebook">
+              <Facebook size={20} />
+            </IconBtn>
+
+            <IconBtn label="Share Twitter">
+              <Twitter size={20} />
+            </IconBtn>
+          </div>
         </div>
-
-        <button
-          type="button"
-          className="absolute left-3 right-3 bottom-3 opacity-0 group-hover:opacity-100 transition rounded-xl bg-gray-900 text-white py-2 text-sm hover:bg-gray-800"
-        >
-          Add to cart
-        </button>
       </div>
 
-      <div className="p-4">
-        <div className="text-xs text-gray-500">In stock: {p.stock}</div>
-        <div className="font-semibold mt-1 line-clamp-1">{p.name}</div>
-        <div className="mt-2 font-bold">${p.price}</div>
+      {/* Content */}
+      <div className="p-4 text-center">
+        <h3 className="font-extrabold uppercase tracking-wide line-clamp-1">
+          {p.name}
+        </h3>
+
+        <p className="text-sm text-gray-500 mt-2">
+          Pour des conditions extrêmes
+        </p>
+
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <Stars value={4} />
+          <span className="font-extrabold text-lg">${p.price}</span>
+        </div>
       </div>
     </div>
   );
 }
+
+function IconBtn({
+  children,
+  label,
+}: {
+  children: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      className="
+  h-12 w-12 rounded-md bg-white shadow
+  grid place-items-center
+  text-gray-700
+  transition transform
+  hover:text-orange-500
+  hover:scale-110
+"
+
+    >
+      {children}
+    </button>
+  );
+}
+
+
+function Stars({ value }: { value: 0 | 1 | 2 | 3 | 4 | 5 }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span
+          key={i}
+          className={i <= value ? "text-orange-500" : "text-gray-300"}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
