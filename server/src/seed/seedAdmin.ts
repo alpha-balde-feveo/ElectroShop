@@ -2,8 +2,13 @@ import bcrypt from "bcrypt";
 import { AdminUserModel } from "../models/AdminUser";
 
 export async function seedAdmin() {
-  const email = "admin@shop.local";
-  const password = "Admin123!";
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    console.warn("⚠️  ADMIN_EMAIL / ADMIN_PASSWORD non définis — seed admin ignoré.");
+    return;
+  }
 
   const exists = await AdminUserModel.findOne({ email });
   if (exists) return;
@@ -11,5 +16,5 @@ export async function seedAdmin() {
   const passwordHash = await bcrypt.hash(password, 10);
   await AdminUserModel.create({ email, passwordHash });
 
-  console.log("✅ Seed admin created:", email, "/", password);
+  console.log("✅ Seed admin created:", email);
 }
