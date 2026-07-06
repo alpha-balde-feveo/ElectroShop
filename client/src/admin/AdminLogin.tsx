@@ -31,32 +31,38 @@ export default function AdminLogin() {
     }
   };
 
+  const inputCls =
+    "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40";
+
   return (
-    <div className="min-h-screen bg-gray-50 grid place-items-center px-4">
+    <div className="min-h-screen bg-mesh text-white grid place-items-center px-4">
       <div className="w-full max-w-sm">
         <Link
           to="/"
-          className="block text-center font-extrabold tracking-wide text-xl mb-6"
+          className="flex items-center justify-center gap-2.5 font-extrabold tracking-wide text-xl mb-8"
         >
-          ELECTROSHOP
+          <img src="/favicon.svg" alt="" className="h-9 w-9 rounded-lg" />
+          GAYE<span className="text-orange-500">STORE</span>
         </Link>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white border rounded-2xl p-6 shadow-sm"
+          className="bg-white/[0.05] backdrop-blur border border-white/10 rounded-3xl p-7 shadow-2xl"
         >
           <h1 className="text-xl font-bold">Espace admin</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Connectez-vous pour gérer la boutique.
           </p>
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
+              <label className="block text-sm font-medium mb-1 text-gray-300">
+                Email
+              </label>
               <input
                 type="email"
                 required
-                className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900/10"
+                className={inputCls}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@..."
@@ -64,13 +70,13 @@ export default function AdminLogin() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-gray-300">
                 Mot de passe
               </label>
               <input
                 type="password"
                 required
-                className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900/10"
+                className={inputCls}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -78,12 +84,12 @@ export default function AdminLogin() {
             </div>
           </div>
 
-          {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
+          {error && <div className="mt-4 text-sm text-red-400">{error}</div>}
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-5 w-full px-4 py-2.5 rounded-xl bg-gray-900 text-white hover:bg-gray-800 text-sm font-medium disabled:opacity-50"
+            className="mt-6 w-full px-4 py-3 rounded-full bg-orange-500 text-white hover:bg-orange-400 text-sm font-semibold transition shadow-lg shadow-orange-500/20 disabled:opacity-50"
           >
             {loading ? "Connexion..." : "Se connecter"}
           </button>
@@ -91,7 +97,7 @@ export default function AdminLogin() {
 
         <Link
           to="/shop"
-          className="block text-center text-sm text-gray-500 hover:text-gray-900 mt-4"
+          className="block text-center text-sm text-gray-500 hover:text-white mt-5 transition"
         >
           ← Retour à la boutique
         </Link>

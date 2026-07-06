@@ -37,14 +37,14 @@ export default function AdminOrderDetail() {
     }
   };
 
-  if (error) return <div className="text-red-600">{error}</div>;
-  if (!order) return <div className="text-gray-600">Chargement...</div>;
+  if (error) return <div className="text-red-400">{error}</div>;
+  if (!order) return <div className="text-gray-400">Chargement...</div>;
 
   return (
     <div>
       <Link
         to="/admin/orders"
-        className="text-sm text-gray-500 hover:text-gray-900"
+        className="text-sm text-gray-500 hover:text-white transition"
       >
         ← Retour aux commandes
       </Link>
@@ -57,13 +57,13 @@ export default function AdminOrderDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Articles */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border rounded-2xl p-6">
+          <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6">
             <h2 className="font-bold mb-4">Articles</h2>
             <div className="space-y-2 text-sm">
               {order.items.map((it, i) => (
                 <div
                   key={i}
-                  className="flex justify-between py-2 border-b last:border-0"
+                  className="flex justify-between py-2 border-b border-white/10 last:border-0"
                 >
                   <span>
                     {it.nameSnapshot}{" "}
@@ -76,30 +76,30 @@ export default function AdminOrderDetail() {
               ))}
             </div>
 
-            <div className="mt-4 pt-4 border-t space-y-1 text-sm">
+            <div className="mt-4 pt-4 border-t border-white/10 space-y-1 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Sous-total</span>
+                <span className="text-gray-400">Sous-total</span>
                 <span>{formatPrice(order.subtotal)}</span>
               </div>
               {order.discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-400">
                   <span>Réduction {order.promoCode && `(${order.promoCode})`}</span>
                   <span>-{formatPrice(order.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-gray-600">Livraison</span>
+                <span className="text-gray-400">Livraison</span>
                 <span>{formatPrice(order.shippingFee)}</span>
               </div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t">
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-white/10">
                 <span>Total</span>
-                <span>{formatPrice(order.total)}</span>
+                <span className="text-orange-400">{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>
 
           {/* Statut */}
-          <div className="bg-white border rounded-2xl p-6">
+          <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6">
             <h2 className="font-bold mb-4">Changer le statut</h2>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(STATUS_LABELS) as Order["status"][]).map((s) => (
@@ -107,10 +107,10 @@ export default function AdminOrderDetail() {
                   key={s}
                   onClick={() => updateStatus(s)}
                   disabled={updating || s === order.status}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium border transition ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
                     s === order.status
-                      ? "bg-gray-900 text-white border-gray-900"
-                      : "hover:bg-gray-50 disabled:opacity-50"
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-white/15 bg-white/5 hover:bg-white/10 disabled:opacity-50"
                   }`}
                 >
                   {STATUS_LABELS[s]}
@@ -121,7 +121,7 @@ export default function AdminOrderDetail() {
         </div>
 
         {/* Client */}
-        <div className="bg-white border rounded-2xl p-6 h-fit text-sm">
+        <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 h-fit text-sm">
           <h2 className="font-bold mb-4">Client</h2>
           <div className="space-y-3">
             <div>
@@ -132,7 +132,7 @@ export default function AdminOrderDetail() {
               <div className="text-gray-500">Téléphone</div>
               <a
                 href={`tel:${order.phone}`}
-                className="font-medium text-orange-500"
+                className="font-medium text-orange-400"
               >
                 {order.phone}
               </a>

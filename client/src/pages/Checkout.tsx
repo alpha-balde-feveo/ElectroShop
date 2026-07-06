@@ -33,10 +33,12 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="text-center py-16">
-        <h1 className="text-3xl font-semibold">Votre panier est vide</h1>
+        <h1 className="text-3xl md:text-4xl font-extrabold">
+          Votre panier est <span className="text-orange-400">vide</span>
+        </h1>
         <Link
           to="/shop"
-          className="inline-block mt-6 px-6 py-3 rounded-xl bg-gray-900 text-white hover:bg-orange-500 transition"
+          className="inline-block mt-8 px-7 py-3.5 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-400 transition shadow-lg shadow-orange-500/20"
         >
           Voir la boutique
         </Link>
@@ -104,11 +106,14 @@ export default function Checkout() {
   };
 
   const inputCls =
-    "w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900/10 bg-white";
+    "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40";
+  const cardCls = "bg-white/[0.04] border border-white/10 rounded-2xl p-6";
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-6">Finaliser la commande</h1>
+      <h1 className="text-3xl md:text-4xl font-extrabold mb-8">
+        Finaliser la <span className="text-orange-400">commande</span>
+      </h1>
 
       <form
         onSubmit={handleSubmit}
@@ -116,12 +121,12 @@ export default function Checkout() {
       >
         {/* Formulaire */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border rounded-2xl p-6">
+          <div className={cardCls}>
             <h2 className="font-bold text-lg mb-4">Informations de livraison</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-300">
                   Nom complet *
                 </label>
                 <input
@@ -135,7 +140,7 @@ export default function Checkout() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-300">
                   Téléphone *
                 </label>
                 <input
@@ -150,7 +155,7 @@ export default function Checkout() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-300">
                   Adresse *
                 </label>
                 <input
@@ -164,7 +169,9 @@ export default function Checkout() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Ville *</label>
+                <label className="block text-sm font-medium mb-1 text-gray-300">
+                  Ville *
+                </label>
                 <input
                   className={inputCls}
                   required
@@ -176,7 +183,7 @@ export default function Checkout() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-300">
                   Notes (optionnel)
                 </label>
                 <textarea
@@ -190,7 +197,7 @@ export default function Checkout() {
             </div>
           </div>
 
-          <div className="bg-white border rounded-2xl p-6">
+          <div className={cardCls}>
             <h2 className="font-bold text-lg mb-4">Mode de livraison</h2>
 
             <div className="space-y-3">
@@ -204,8 +211,8 @@ export default function Checkout() {
                   key={value}
                   className={`flex items-center justify-between border rounded-xl px-4 py-3 cursor-pointer transition ${
                     shipping === value
-                      ? "border-orange-500 bg-orange-50"
-                      : "hover:bg-gray-50"
+                      ? "border-orange-500 bg-orange-500/10"
+                      : "border-white/10 hover:bg-white/5"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -218,7 +225,7 @@ export default function Checkout() {
                     />
                     <span className="text-sm font-medium">{label}</span>
                   </span>
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm font-semibold text-orange-400">
                     {formatPrice(SHIPPING_FEES[value])}
                   </span>
                 </label>
@@ -228,13 +235,13 @@ export default function Checkout() {
         </div>
 
         {/* Résumé */}
-        <div className="bg-white border rounded-2xl p-6 h-fit">
+        <div className={`${cardCls} h-fit`}>
           <h2 className="font-bold text-lg">Votre commande</h2>
 
           <div className="mt-4 space-y-2 text-sm">
             {items.map(({ product, qty }) => (
               <div key={product._id} className="flex justify-between gap-2">
-                <span className="text-gray-600 line-clamp-1">
+                <span className="text-gray-400 line-clamp-1">
                   {product.name} × {qty}
                 </span>
                 <span className="font-medium whitespace-nowrap">
@@ -257,16 +264,16 @@ export default function Checkout() {
                 type="button"
                 onClick={applyPromo}
                 disabled={promoLoading}
-                className="px-4 py-2 rounded-xl border text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl border border-white/15 bg-white/5 text-sm font-medium hover:bg-white/10 disabled:opacity-50 transition"
               >
                 {promoLoading ? "..." : "Appliquer"}
               </button>
             </div>
             {promoError && (
-              <div className="text-xs text-red-600 mt-1">{promoError}</div>
+              <div className="text-xs text-red-400 mt-1">{promoError}</div>
             )}
             {promo && (
-              <div className="text-xs text-green-600 mt-1">
+              <div className="text-xs text-green-400 mt-1">
                 Code {promo.code} appliqué (
                 {promo.type === "PERCENT"
                   ? `-${promo.value}%`
@@ -276,24 +283,24 @@ export default function Checkout() {
             )}
           </div>
 
-          <div className="mt-4 pt-4 border-t space-y-2 text-sm">
+          <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Sous-total</span>
+              <span className="text-gray-400">Sous-total</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-green-600">
+              <div className="flex justify-between text-green-400">
                 <span>Réduction</span>
                 <span>-{formatPrice(discount)}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-600">Livraison</span>
+              <span className="text-gray-400">Livraison</span>
               <span>{formatPrice(shippingFee)}</span>
             </div>
-            <div className="flex justify-between font-bold text-base pt-2 border-t">
+            <div className="flex justify-between font-bold text-base pt-2 border-t border-white/10">
               <span>Total</span>
-              <span>{formatPrice(total)}</span>
+              <span className="text-orange-400">{formatPrice(total)}</span>
             </div>
           </div>
 
@@ -301,12 +308,12 @@ export default function Checkout() {
             Paiement à la livraison (cash ou mobile money).
           </div>
 
-          {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
+          {error && <div className="mt-3 text-sm text-red-400">{error}</div>}
 
           <button
             type="submit"
             disabled={submitting}
-            className="mt-4 w-full px-6 py-3 rounded-xl bg-gray-900 text-white hover:bg-orange-500 transition font-medium disabled:opacity-50"
+            className="mt-4 w-full px-6 py-3.5 rounded-full bg-orange-500 text-white hover:bg-orange-400 transition font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-50"
           >
             {submitting ? "Envoi en cours..." : "Confirmer la commande"}
           </button>

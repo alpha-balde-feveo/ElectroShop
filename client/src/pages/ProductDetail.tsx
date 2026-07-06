@@ -43,7 +43,7 @@ export default function ProductDetail() {
     };
   }, [id]);
 
-  if (loading) return <div className="text-gray-600">Chargement...</div>;
+  if (loading) return <div className="text-gray-400">Chargement...</div>;
   if (error || !product)
     return (
       <div>
@@ -78,7 +78,7 @@ export default function ProductDetail() {
   return (
     <div>
       <div className="text-sm text-gray-500 mb-6">
-        <Link to="/shop" className="hover:text-gray-900">
+        <Link to="/shop" className="hover:text-white">
           Boutique
         </Link>{" "}
         / {product.name}
@@ -87,7 +87,7 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Images */}
         <div>
-          <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden border">
+          <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10">
             <img
               src={mainImg}
               alt={product.name}
@@ -119,7 +119,7 @@ export default function ProductDetail() {
         {/* Infos */}
         <div>
           {category && (
-            <div className="text-sm text-orange-500 font-medium">{category}</div>
+            <div className="text-sm text-orange-400 font-semibold uppercase tracking-widest">{category}</div>
           )}
           <h1 className="text-3xl font-bold mt-1">{product.name}</h1>
           {product.brand && (
@@ -128,34 +128,34 @@ export default function ProductDetail() {
 
           <div className="mt-4 flex items-center gap-3">
             {product.oldPrice && product.oldPrice > product.price && (
-              <span className="text-lg text-gray-400 line-through">
+              <span className="text-lg text-gray-500 line-through">
                 {formatPrice(product.oldPrice)}
               </span>
             )}
-            <span className="text-3xl font-extrabold">
+            <span className="text-3xl font-extrabold text-orange-400">
               {formatPrice(product.price)}
             </span>
           </div>
 
           <div className="mt-3 text-sm">
             {outOfStock ? (
-              <span className="text-red-600 font-medium">Rupture de stock</span>
+              <span className="text-red-400 font-medium">Rupture de stock</span>
             ) : (
-              <span className="text-green-600 font-medium">
+              <span className="text-green-400 font-medium">
                 En stock ({product.stock} disponibles)
               </span>
             )}
           </div>
 
           {product.description && (
-            <p className="mt-4 text-gray-700 leading-relaxed">
+            <p className="mt-4 text-gray-400 leading-relaxed">
               {product.description}
             </p>
           )}
 
           {/* Quantité + Ajouter */}
           <div className="mt-6 flex items-center gap-4">
-            <div className="flex items-center border rounded-xl bg-white">
+            <div className="flex items-center border border-white/15 rounded-xl bg-white/5">
               <button
                 className="p-3 hover:text-orange-500 disabled:opacity-40"
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -178,7 +178,7 @@ export default function ProductDetail() {
             <button
               onClick={handleAdd}
               disabled={outOfStock}
-              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gray-900 text-white hover:bg-orange-500 transition font-medium disabled:opacity-50 disabled:hover:bg-gray-900"
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-orange-500 text-white hover:bg-orange-400 transition font-semibold shadow-lg shadow-orange-500/20 disabled:opacity-50 disabled:hover:bg-orange-500"
             >
               <ShoppingCart size={18} />
               {added ? "Ajouté ✓" : "Ajouter au panier"}
@@ -186,7 +186,7 @@ export default function ProductDetail() {
           </div>
 
           {added && (
-            <div className="mt-3 text-sm text-green-600">
+            <div className="mt-3 text-sm text-green-400">
               Produit ajouté au panier.{" "}
               <Link to="/cart" className="underline font-medium">
                 Voir le panier
@@ -198,14 +198,14 @@ export default function ProductDetail() {
           {specs.length > 0 && (
             <div className="mt-8">
               <h2 className="font-bold text-lg mb-3">Caractéristiques</h2>
-              <table className="w-full text-sm border rounded-xl overflow-hidden">
+              <table className="w-full text-sm border border-white/10 rounded-xl overflow-hidden">
                 <tbody>
                   {specs.map(([k, v]) => (
-                    <tr key={k} className="odd:bg-gray-50">
-                      <td className="px-4 py-2 font-medium text-gray-700 capitalize">
+                    <tr key={k} className="odd:bg-white/[0.04]">
+                      <td className="px-4 py-2.5 font-medium text-gray-300 capitalize">
                         {k}
                       </td>
-                      <td className="px-4 py-2 text-gray-600">{String(v)}</td>
+                      <td className="px-4 py-2.5 text-gray-500">{String(v)}</td>
                     </tr>
                   ))}
                 </tbody>

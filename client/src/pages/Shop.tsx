@@ -88,19 +88,21 @@ export default function Shop() {
     <div>
       <div className="mb-6">
         <div className="text-sm text-gray-500">Accueil / Boutique</div>
-        <h1 className="text-3xl font-semibold mt-2">Tous nos produits</h1>
+        <h1 className="text-3xl md:text-4xl font-extrabold mt-2">
+          Tous nos <span className="text-orange-400">produits</span>
+        </h1>
       </div>
 
       {/* Barre filtres */}
-      <div className="bg-white rounded-2xl border shadow-sm p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="text-sm text-gray-600">
+      <div className="bg-white/[0.04] rounded-2xl border border-white/10 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="text-sm text-gray-400">
           <span className="font-semibold">{filtered.length}</span> sur{" "}
           <span className="font-semibold">{products.length}</span> résultats
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <select
-            className="rounded-xl border px-3 py-2 text-sm"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white [&>option]:bg-[#0b0d14]"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -113,7 +115,7 @@ export default function Shop() {
           </select>
 
           <select
-            className="rounded-xl border px-3 py-2 text-sm"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white [&>option]:bg-[#0b0d14]"
             value={sort}
             onChange={(e) => {
               const v = e.target.value;
@@ -126,7 +128,7 @@ export default function Shop() {
           </select>
 
           <select
-            className="rounded-xl border px-3 py-2 text-sm"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white [&>option]:bg-[#0b0d14]"
             value={perPage}
             onChange={(e) => setPerPage(Number(e.target.value))}
           >
@@ -136,7 +138,7 @@ export default function Shop() {
           </select>
 
           <input
-            className="w-full md:w-72 rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-gray-900/10 text-sm"
+            className="w-full md:w-72 rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500/40 text-sm text-white placeholder-gray-500"
             placeholder="Rechercher un produit..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -144,11 +146,11 @@ export default function Shop() {
         </div>
       </div>
 
-      {loading && <div className="mt-6 text-gray-600">Chargement...</div>}
+      {loading && <div className="mt-6 text-gray-400">Chargement...</div>}
       {error && <div className="mt-6 text-red-600">{error}</div>}
 
       {!loading && !error && filtered.length === 0 && (
-        <div className="mt-6 text-gray-600">Aucun produit trouvé.</div>
+        <div className="mt-6 text-gray-400">Aucun produit trouvé.</div>
       )}
 
       {!loading && !error && (

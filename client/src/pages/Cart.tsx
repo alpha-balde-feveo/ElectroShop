@@ -10,13 +10,15 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <div className="text-center py-16">
-        <h1 className="text-3xl font-semibold">Votre panier est vide</h1>
-        <p className="text-gray-500 mt-2">
+        <h1 className="text-3xl md:text-4xl font-extrabold">
+          Votre panier est <span className="text-orange-400">vide</span>
+        </h1>
+        <p className="text-gray-500 mt-3">
           Parcourez la boutique pour trouver votre bonheur.
         </p>
         <Link
           to="/shop"
-          className="inline-block mt-6 px-6 py-3 rounded-xl bg-gray-900 text-white hover:bg-orange-500 transition"
+          className="inline-block mt-8 px-7 py-3.5 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-400 transition shadow-lg shadow-orange-500/20"
         >
           Voir la boutique
         </Link>
@@ -26,7 +28,9 @@ export default function Cart() {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-6">Mon panier</h1>
+      <h1 className="text-3xl md:text-4xl font-extrabold mb-8">
+        Mon <span className="text-orange-400">panier</span>
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Items */}
@@ -34,11 +38,11 @@ export default function Cart() {
           {items.map(({ product, qty }) => (
             <div
               key={product._id}
-              className="bg-white border rounded-2xl p-4 flex gap-4 items-center"
+              className="bg-white/[0.04] border border-white/10 rounded-2xl p-4 flex gap-4 items-center hover:border-white/20 transition"
             >
               <Link
                 to={`/product/${product._id}`}
-                className="h-24 w-24 rounded-xl overflow-hidden bg-gray-100 shrink-0"
+                className="h-24 w-24 rounded-xl overflow-hidden bg-white/5 shrink-0"
               >
                 <img
                   src={buildImageUrl(product.images?.[0]?.url)}
@@ -50,7 +54,7 @@ export default function Cart() {
               <div className="flex-1 min-w-0">
                 <Link
                   to={`/product/${product._id}`}
-                  className="font-semibold line-clamp-1 hover:text-orange-500"
+                  className="font-semibold line-clamp-1 hover:text-orange-400 transition"
                 >
                   {product.name}
                 </Link>
@@ -59,9 +63,9 @@ export default function Cart() {
                 </div>
 
                 <div className="mt-2 flex items-center gap-3">
-                  <div className="flex items-center border rounded-lg">
+                  <div className="flex items-center border border-white/15 rounded-lg bg-white/5">
                     <button
-                      className="p-2 hover:text-orange-500 disabled:opacity-40"
+                      className="p-2 hover:text-orange-400 disabled:opacity-40 transition"
                       onClick={() => setQty(product._id, qty - 1)}
                       disabled={qty <= 1}
                       aria-label="Diminuer"
@@ -72,7 +76,7 @@ export default function Cart() {
                       {qty}
                     </span>
                     <button
-                      className="p-2 hover:text-orange-500 disabled:opacity-40"
+                      className="p-2 hover:text-orange-400 disabled:opacity-40 transition"
                       onClick={() => setQty(product._id, qty + 1)}
                       disabled={qty >= product.stock}
                       aria-label="Augmenter"
@@ -83,7 +87,7 @@ export default function Cart() {
 
                   <button
                     onClick={() => removeItem(product._id)}
-                    className="text-gray-400 hover:text-red-500 transition"
+                    className="text-gray-500 hover:text-red-400 transition"
                     aria-label="Retirer du panier"
                   >
                     <Trash2 size={18} />
@@ -91,7 +95,7 @@ export default function Cart() {
                 </div>
               </div>
 
-              <div className="font-bold whitespace-nowrap">
+              <div className="font-bold whitespace-nowrap text-orange-400">
                 {formatPrice(product.price * qty)}
               </div>
             </div>
@@ -99,37 +103,37 @@ export default function Cart() {
 
           <button
             onClick={clear}
-            className="text-sm text-gray-500 hover:text-red-500 underline"
+            className="text-sm text-gray-500 hover:text-red-400 underline underline-offset-4 transition"
           >
             Vider le panier
           </button>
         </div>
 
         {/* Résumé */}
-        <div className="bg-white border rounded-2xl p-6 h-fit">
+        <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 h-fit">
           <h2 className="font-bold text-lg">Résumé</h2>
 
           <div className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Sous-total</span>
+              <span className="text-gray-400">Sous-total</span>
               <span className="font-semibold">{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Livraison</span>
+              <span className="text-gray-400">Livraison</span>
               <span className="text-gray-500">Calculée au paiement</span>
             </div>
           </div>
 
           <Link
             to="/checkout"
-            className="mt-6 block text-center px-6 py-3 rounded-xl bg-gray-900 text-white hover:bg-orange-500 transition font-medium"
+            className="mt-6 block text-center px-6 py-3.5 rounded-full bg-orange-500 text-white hover:bg-orange-400 transition font-semibold shadow-lg shadow-orange-500/20"
           >
             Passer la commande
           </Link>
 
           <Link
             to="/shop"
-            className="mt-3 block text-center text-sm text-gray-500 hover:text-gray-900"
+            className="mt-3 block text-center text-sm text-gray-500 hover:text-white transition"
           >
             Continuer mes achats
           </Link>

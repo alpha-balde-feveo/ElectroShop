@@ -16,9 +16,9 @@ export default function ProductCard({ p }: { p: Product }) {
       : 0;
 
   return (
-    <div className="group/card bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="group/card bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden hover:border-orange-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300">
       {/* Image */}
-      <div className="group relative aspect-square bg-gray-100 overflow-hidden">
+      <div className="group relative aspect-square bg-white/5 overflow-hidden">
         <Link to={`/product/${p._id}`}>
           <img
             src={img}
@@ -29,7 +29,7 @@ export default function ProductCard({ p }: { p: Product }) {
         </Link>
 
         {outOfStock && (
-          <span className="absolute top-3 left-3 rounded-full bg-red-600 text-white text-xs px-3 py-1 font-medium">
+          <span className="absolute top-3 left-3 rounded-full bg-red-600/90 text-white text-xs px-3 py-1 font-medium">
             Rupture de stock
           </span>
         )}
@@ -41,7 +41,7 @@ export default function ProductCard({ p }: { p: Product }) {
         )}
 
         {/* Dark overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/40" />
+        <div className="pointer-events-none absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/50" />
 
         {/* Center icons */}
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -57,7 +57,7 @@ export default function ProductCard({ p }: { p: Product }) {
             <Link
               to={`/product/${p._id}`}
               aria-label="Voir le produit"
-              className="h-12 w-12 rounded-md bg-white shadow grid place-items-center text-gray-700 transition transform hover:text-orange-500 hover:scale-110"
+              className="h-12 w-12 rounded-md bg-white shadow grid place-items-center text-gray-800 transition transform hover:text-orange-500 hover:scale-110"
             >
               <Eye size={20} />
             </Link>
@@ -68,7 +68,7 @@ export default function ProductCard({ p }: { p: Product }) {
       {/* Content */}
       <div className="p-4 text-center">
         <Link to={`/product/${p._id}`}>
-          <h3 className="font-extrabold uppercase tracking-wide line-clamp-1 group-hover/card:text-orange-500 transition">
+          <h3 className="font-extrabold uppercase tracking-wide line-clamp-1 text-white group-hover/card:text-orange-400 transition">
             {p.name}
           </h3>
         </Link>
@@ -77,11 +77,13 @@ export default function ProductCard({ p }: { p: Product }) {
 
         <div className="mt-3 flex items-center justify-center gap-2">
           {discount > 0 && (
-            <span className="text-sm text-gray-400 line-through">
+            <span className="text-sm text-gray-500 line-through">
               {formatPrice(p.oldPrice!)}
             </span>
           )}
-          <span className="font-extrabold text-lg">{formatPrice(p.price)}</span>
+          <span className="font-extrabold text-lg text-orange-400">
+            {formatPrice(p.price)}
+          </span>
         </div>
       </div>
     </div>
@@ -105,7 +107,7 @@ function IconBtn({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="h-12 w-12 rounded-md bg-white shadow grid place-items-center text-gray-700 transition transform hover:text-orange-500 hover:scale-110 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:text-gray-700"
+      className="h-12 w-12 rounded-md bg-white shadow grid place-items-center text-gray-800 transition transform hover:text-orange-500 hover:scale-110 disabled:opacity-50 disabled:hover:scale-100"
     >
       {children}
     </button>

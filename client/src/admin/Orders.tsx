@@ -30,7 +30,7 @@ export default function AdminOrders() {
         <h1 className="text-2xl font-bold">Commandes ({visible.length})</h1>
 
         <select
-          className="rounded-xl border px-3 py-2 text-sm bg-white"
+          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white [&>option]:bg-[#0b0d14]"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
@@ -43,13 +43,13 @@ export default function AdminOrders() {
         </select>
       </div>
 
-      {loading && <div className="text-gray-600">Chargement...</div>}
-      {error && <div className="text-red-600">{error}</div>}
+      {loading && <div className="text-gray-400">Chargement...</div>}
+      {error && <div className="text-red-400">{error}</div>}
 
       {!loading && !error && (
-        <div className="bg-white border rounded-2xl overflow-hidden">
+        <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-gray-600">
+            <thead className="bg-white/5 text-left text-gray-400">
               <tr>
                 <th className="px-4 py-3">Client</th>
                 <th className="px-4 py-3 hidden md:table-cell">Ville</th>
@@ -60,25 +60,25 @@ export default function AdminOrders() {
             </thead>
             <tbody>
               {visible.map((o) => (
-                <tr key={o._id} className="border-t hover:bg-gray-50">
+                <tr key={o._id} className="border-t border-white/10 hover:bg-white/[0.03] transition">
                   <td className="px-4 py-3">
                     <Link
                       to={`/admin/orders/${o._id}`}
-                      className="font-medium hover:text-orange-500"
+                      className="font-medium hover:text-orange-400 transition"
                     >
                       {o.customerName}
                     </Link>
                     <div className="text-xs text-gray-500">{o.phone}</div>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-gray-600">
+                  <td className="px-4 py-3 hidden md:table-cell text-gray-400">
                     {o.city}
                   </td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-gray-600">
+                  <td className="px-4 py-3 hidden sm:table-cell text-gray-400">
                     {o.createdAt
                       ? new Date(o.createdAt).toLocaleDateString("fr-FR")
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 font-medium whitespace-nowrap">
+                  <td className="px-4 py-3 font-medium whitespace-nowrap text-orange-400">
                     {formatPrice(o.total)}
                   </td>
                   <td className="px-4 py-3">

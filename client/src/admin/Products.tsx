@@ -84,20 +84,20 @@ export default function AdminProducts() {
         <h1 className="text-2xl font-bold">Produits ({products.length})</h1>
         <button
           onClick={openCreate}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 text-white hover:bg-gray-800 text-sm font-medium"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-400 text-sm font-semibold transition shadow-lg shadow-orange-500/20"
         >
           <Plus size={16} />
           Nouveau produit
         </button>
       </div>
 
-      {loading && <div className="text-gray-600">Chargement...</div>}
-      {error && <div className="text-red-600">{error}</div>}
+      {loading && <div className="text-gray-400">Chargement...</div>}
+      {error && <div className="text-red-400">{error}</div>}
 
       {!loading && (
-        <div className="bg-white border rounded-2xl overflow-hidden">
+        <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-gray-600">
+            <thead className="bg-white/5 text-left text-gray-400">
               <tr>
                 <th className="px-4 py-3">Produit</th>
                 <th className="px-4 py-3 hidden md:table-cell">Catégorie</th>
@@ -108,18 +108,18 @@ export default function AdminProducts() {
             </thead>
             <tbody>
               {products.map((p) => (
-                <tr key={p._id} className="border-t">
+                <tr key={p._id} className="border-t border-white/10 hover:bg-white/[0.03] transition">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <img
                         src={buildImageUrl(p.images?.[0]?.url)}
                         alt=""
-                        className="h-10 w-10 rounded-lg object-cover bg-gray-100"
+                        className="h-10 w-10 rounded-lg object-cover bg-white/10"
                       />
                       <span className="font-medium line-clamp-1">{p.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-gray-600">
+                  <td className="px-4 py-3 hidden md:table-cell text-gray-400">
                     {typeof p.categoryId === "object" && p.categoryId
                       ? p.categoryId.name
                       : "—"}
@@ -131,8 +131,8 @@ export default function AdminProducts() {
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         p.stock <= 3
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-700"
+                          ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                          : "bg-green-500/15 text-green-400 border border-green-500/30"
                       }`}
                     >
                       {p.stock}
@@ -142,14 +142,14 @@ export default function AdminProducts() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => openEdit(p)}
-                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+                        className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition"
                         aria-label="Modifier"
                       >
                         <Pencil size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(p)}
-                        className="p-2 rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600"
+                        className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition"
                         aria-label="Supprimer"
                       >
                         <Trash2 size={16} />
@@ -278,13 +278,13 @@ function ProductForm({
   };
 
   const inputCls =
-    "w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-900/10 bg-white";
+    "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40 [&>option]:bg-[#0b0d14]";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl w-full max-w-2xl p-6 my-8"
+        className="bg-[#0b0d14] border border-white/10 text-white rounded-3xl w-full max-w-2xl p-6 my-8 shadow-2xl"
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold">
@@ -293,7 +293,7 @@ function ProductForm({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100"
+            className="p-2 rounded-lg hover:bg-white/10 transition"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -352,7 +352,7 @@ function ProductForm({
                   <img
                     src={buildImageUrl(im.url)}
                     alt=""
-                    className="h-20 w-20 rounded-xl object-cover border"
+                    className="h-20 w-20 rounded-xl object-cover border border-white/10"
                   />
                   <button
                     type="button"
@@ -365,7 +365,7 @@ function ProductForm({
                 </div>
               ))}
 
-              <label className="h-20 w-20 rounded-xl border-2 border-dashed grid place-items-center text-gray-400 cursor-pointer hover:border-gray-400 hover:text-gray-600 text-xs text-center">
+              <label className="h-20 w-20 rounded-xl border-2 border-dashed border-white/20 grid place-items-center text-gray-500 cursor-pointer hover:border-orange-500/60 hover:text-orange-400 text-xs text-center transition">
                 {uploading ? "..." : "+ Ajouter"}
                 <input
                   type="file"
@@ -379,20 +379,20 @@ function ProductForm({
           </div>
         </div>
 
-        {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
+        {error && <div className="mt-4 text-sm text-red-400">{error}</div>}
 
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border text-sm font-medium hover:bg-gray-50"
+            className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-sm font-medium hover:bg-white/10 transition"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 rounded-xl bg-gray-900 text-white hover:bg-gray-800 text-sm font-medium disabled:opacity-50"
+            className="px-5 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-400 text-sm font-semibold transition disabled:opacity-50"
           >
             {saving ? "Enregistrement..." : product ? "Enregistrer" : "Créer"}
           </button>

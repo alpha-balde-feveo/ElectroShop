@@ -24,26 +24,26 @@ export default function AdminDashboard() {
       );
   }, []);
 
-  if (error) return <div className="text-red-600">{error}</div>;
-  if (!stats) return <div className="text-gray-600">Chargement...</div>;
+  if (error) return <div className="text-red-400">{error}</div>;
+  if (!stats) return <div className="text-gray-400">Chargement...</div>;
 
   const cards = [
     {
       label: "Commandes",
       value: String(stats.ordersCount),
-      icon: <ShoppingBag className="text-blue-500" />,
+      icon: <ShoppingBag className="text-blue-400" />,
       to: "/admin/orders",
     },
     {
       label: "Chiffre d'affaires",
       value: formatPrice(stats.revenue),
-      icon: <Wallet className="text-green-500" />,
+      icon: <Wallet className="text-green-400" />,
       to: "/admin/orders",
     },
     {
       label: "Stock faible (≤ 3)",
       value: String(stats.lowStock),
-      icon: <AlertTriangle className="text-orange-500" />,
+      icon: <AlertTriangle className="text-orange-400" />,
       to: "/admin/products",
     },
   ];
@@ -57,10 +57,10 @@ export default function AdminDashboard() {
           <Link
             key={c.label}
             to={c.to}
-            className="bg-white border rounded-2xl p-5 shadow-sm hover:shadow transition"
+            className="bg-white/[0.04] border border-white/10 rounded-2xl p-5 hover:border-orange-500/40 hover:-translate-y-0.5 transition-all"
           >
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{c.label}</span>
+              <span className="text-sm text-gray-400">{c.label}</span>
               {c.icon}
             </div>
             <div className="text-2xl font-extrabold mt-2">{c.value}</div>

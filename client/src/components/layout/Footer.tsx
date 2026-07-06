@@ -3,14 +3,15 @@ import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-950 text-gray-300">
+    <footer className="bg-[#05060a] text-gray-400 border-t border-white/10">
       <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
         {/* Marque */}
         <div className="md:col-span-2">
-          <div className="font-extrabold tracking-wide text-xl text-white">
-            ELECTROSHOP
+          <div className="flex items-center gap-2.5 font-extrabold tracking-wide text-xl text-white">
+            <img src="/favicon.svg" alt="" className="h-8 w-8 rounded-lg" />
+            GAYE<span className="text-orange-500">STORE</span>
           </div>
-          <p className="mt-3 text-sm text-gray-400 max-w-sm">
+          <p className="mt-3 text-sm text-gray-500 max-w-sm">
             Votre boutique tech de confiance au Sénégal. Ordinateurs,
             smartphones, gaming et accessoires — livrés rapidement, payés à la
             réception.
@@ -19,14 +20,14 @@ export default function Footer() {
             <a
               href="#"
               aria-label="Facebook"
-              className="h-9 w-9 rounded-lg bg-white/10 grid place-items-center hover:bg-orange-500 transition"
+              className="h-9 w-9 rounded-lg bg-white/10 grid place-items-center hover:bg-orange-500 hover:text-white transition"
             >
               <Facebook size={16} />
             </a>
             <a
               href="#"
               aria-label="Instagram"
-              className="h-9 w-9 rounded-lg bg-white/10 grid place-items-center hover:bg-orange-500 transition"
+              className="h-9 w-9 rounded-lg bg-white/10 grid place-items-center hover:bg-orange-500 hover:text-white transition"
             >
               <Instagram size={16} />
             </a>
@@ -72,10 +73,10 @@ export default function Footer() {
             <li className="flex items-center gap-2">
               <Mail size={14} className="text-orange-400" />
               <a
-                href="mailto:contact@electroshop.sn"
+                href="mailto:contact@gayestore.sn"
                 className="hover:text-orange-400"
               >
-                contact@electroshop.sn
+                contact@gayestore.sn
               </a>
             </li>
           </ul>
@@ -83,8 +84,8 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-gray-500 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-          <div>© {new Date().getFullYear()} Electroshop — Tous droits réservés</div>
+        <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-gray-600 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+          <div>© {new Date().getFullYear()} GayeStore — Tous droits réservés</div>
           <div>Paiement à la livraison · Cash & Mobile Money</div>
         </div>
       </div>
