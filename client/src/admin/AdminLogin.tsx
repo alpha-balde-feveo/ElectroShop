@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
 import { api } from "../api/http";
-import { setToken } from "./auth";
+import { isLoggedIn, setToken } from "./auth";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -10,6 +10,11 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Déjà connecté ? Direction le dashboard (empêche de revenir au login via "retour")
+  if (isLoggedIn()) {
+    return <Navigate to="/admin" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

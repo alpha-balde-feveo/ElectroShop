@@ -1,15 +1,31 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { Command, LogOut, Store } from "lucide-react";
 import { clearToken, isLoggedIn } from "./auth";
 import CommandPalette from "./CommandPalette";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [paletteOpen, setPaletteOpen] = useState(false);
 
+  // Re-vérifie le token à chaque navigation interne (retour navigateur inclus)
+  const authed = isLoggedIn();
+
   useEffect(() => {
-    if (!isLoggedIn()) navigate("/admin/login");
+    // Couvre aussi le retour via bfcache (page restaurée depuis le cache)
+    const onPageShow = () => {
+      if (!isLoggedIn()) navigate("/admin/login", { replace: true });
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
   }, [navigate]);
 
   // Raccourci ⌘K / Ctrl+K
@@ -26,8 +42,13 @@ export default function AdminLayout() {
 
   const logout = () => {
     clearToken();
-    navigate("/admin/login");
+    navigate("/admin/login", { replace: true });
   };
+
+  // Garde au rendu : rien ne s'affiche si non connecté
+  if (!authed) {
+    return <Navigate to="/admin/login" replace state={{ from: location }} />;
+  }
 
   const navCls = ({ isActive }: { isActive: boolean }) =>
     `transition ${
