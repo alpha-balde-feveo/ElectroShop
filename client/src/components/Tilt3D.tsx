@@ -49,7 +49,6 @@ export default function Tilt3D({
   const style: CSSProperties = {
     transform,
     transition: "transform 0.15s ease-out",
-    transformStyle: "preserve-3d",
   };
 
   return (

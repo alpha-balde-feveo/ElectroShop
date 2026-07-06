@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -321,11 +321,21 @@ function BentoCard({
   big?: boolean;
 }) {
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const discount = Math.round(((p.oldPrice! - p.price) / p.oldPrice!) * 100);
 
   return (
     <Tilt3D max={8} className={`rounded-3xl ${className}`}>
-      <div className="group relative h-full w-full rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04]">
+      <div
+        onClick={() => navigate(`/product/${p._id}`)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") navigate(`/product/${p._id}`);
+        }}
+        role="link"
+        tabIndex={0}
+        aria-label={`Voir ${p.name}`}
+        className="group relative h-full w-full rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04] cursor-pointer"
+      >
         <img
           src={buildImageUrl(p.images?.[0]?.url)}
           alt={p.name}
@@ -333,13 +343,6 @@ function BentoCard({
           className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-
-        {/* Lien plein cadre : toute la carte est cliquable */}
-        <Link
-          to={`/product/${p._id}`}
-          aria-label={`Voir ${p.name}`}
-          className="absolute inset-0 z-10"
-        />
 
         {/* Badge réduction */}
         <span
@@ -350,10 +353,9 @@ function BentoCard({
           -{discount}%
         </span>
 
-        {/* Bouton ajout rapide (au-dessus du lien) */}
+        {/* Bouton ajout rapide (n'ouvre pas le produit) */}
         <button
           onClick={(e) => {
-            e.preventDefault();
             e.stopPropagation();
             addItem(p);
           }}
@@ -363,7 +365,7 @@ function BentoCard({
           <Plus size={16} />
         </button>
 
-        {/* Infos bas de carte (décoratives, le clic passe au lien) */}
+        {/* Infos bas de carte */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-5">
           <div
             className={`font-extrabold leading-tight ${
