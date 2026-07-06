@@ -1,34 +1,40 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
 export default function Header() {
   const { count } = useCart();
+  const { pathname } = useLocation();
+  const dark = pathname === "/"; // page d'accueil sombre
 
   const navCls = ({ isActive }: { isActive: boolean }) =>
     `transition ${
-      isActive ? "text-orange-500 font-semibold" : "hover:text-gray-900"
+      isActive
+        ? "text-orange-500 font-semibold"
+        : dark
+        ? "hover:text-white"
+        : "hover:text-gray-900"
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b">
-      {/* Top bar */}
-      <div className="bg-gray-950 text-gray-300 text-xs">
-        <div className="max-w-6xl mx-auto px-4 py-1.5 flex items-center justify-between">
-          <span>🚚 Livraison express 24h à Dakar</span>
-          <span className="hidden sm:inline">
-            💵 Paiement à la livraison — Cash & Mobile Money
-          </span>
-        </div>
-      </div>
-
-      {/* Main nav */}
+    <header
+      className={`sticky top-0 z-40 backdrop-blur border-b transition-colors ${
+        dark
+          ? "bg-[#05060a]/80 border-white/10 text-gray-300"
+          : "bg-white/90 border-gray-200 text-gray-700"
+      }`}
+    >
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="font-extrabold tracking-wide text-lg">
+        <Link
+          to="/"
+          className={`font-extrabold tracking-wide text-lg ${
+            dark ? "text-white" : "text-gray-900"
+          }`}
+        >
           ELECTRO<span className="text-orange-500">SHOP</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-700">
+        <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
           <NavLink to="/" end className={navCls}>
             Accueil
           </NavLink>
@@ -44,7 +50,11 @@ export default function Header() {
           <Link
             to="/cart"
             aria-label="Panier"
-            className="relative px-3 py-2 rounded-xl border bg-white hover:bg-gray-50 text-sm inline-flex items-center gap-2 transition"
+            className={`relative px-3 py-2 rounded-xl border text-sm inline-flex items-center gap-2 transition ${
+              dark
+                ? "border-white/15 bg-white/5 hover:bg-white/10 text-white"
+                : "border-gray-200 bg-white hover:bg-gray-50"
+            }`}
           >
             <ShoppingCart size={16} />
             {count > 0 && (
@@ -55,7 +65,11 @@ export default function Header() {
           </Link>
           <Link
             to="/admin"
-            className="px-3 py-2 rounded-xl bg-gray-900 text-white hover:bg-gray-800 text-sm transition"
+            className={`px-3 py-2 rounded-xl text-sm transition ${
+              dark
+                ? "bg-white text-gray-950 hover:bg-orange-400 hover:text-white font-semibold"
+                : "bg-gray-900 text-white hover:bg-gray-800"
+            }`}
           >
             Admin
           </Link>

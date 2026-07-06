@@ -1,41 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  ArrowUpRight,
   Flame,
-  Gamepad2,
-  HandCoins,
-  Headphones,
-  Laptop,
-  ShieldCheck,
-  Smartphone,
+  Plus,
   Sparkles,
-  Truck,
-  Wifi,
   Zap,
 } from "lucide-react";
 import type React from "react";
 import { api } from "../api/http";
 import type { Category, Product } from "../types";
-import ProductCard from "../components/ProductCard";
+import Tilt3D from "../components/Tilt3D";
 import { formatPrice } from "../utils/format";
 import { buildImageUrl } from "../utils/image";
-
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  informatique: <Laptop size={28} />,
-  smartphones: <Smartphone size={28} />,
-  accessoires: <Headphones size={28} />,
-  reseau: <Wifi size={28} />,
-  gaming: <Gamepad2 size={28} />,
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  informatique: "from-blue-500 to-indigo-600",
-  smartphones: "from-emerald-500 to-teal-600",
-  accessoires: "from-purple-500 to-fuchsia-600",
-  reseau: "from-cyan-500 to-sky-600",
-  gaming: "from-orange-500 to-red-600",
-};
+import { useCart } from "../context/CartContext";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -61,7 +40,7 @@ export default function Home() {
             (b.oldPrice! - b.price) / b.oldPrice! -
             (a.oldPrice! - a.price) / a.oldPrice!
         )
-        .slice(0, 4),
+        .slice(0, 5),
     [products]
   );
 
@@ -73,321 +52,537 @@ export default function Home() {
           const bd = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return bd - ad;
         })
-        .slice(0, 8),
+        .slice(0, 10),
     [products]
   );
 
-  const heroProduct = deals[0] ?? products[0];
+  const countByCategory = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of products) {
+      const id =
+        typeof p.categoryId === "object" && p.categoryId
+          ? p.categoryId._id
+          : (p.categoryId as string);
+      if (id) m.set(id, (m.get(id) ?? 0) + 1);
+    }
+    return m;
+  }, [products]);
 
   return (
-    <div>
-      {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden bg-gray-950 text-white">
-        {/* Décor */}
-        <div className="absolute inset-0">
-          <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-orange-500/20 blur-3xl" />
-          <div className="absolute top-1/2 -right-32 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
-        </div>
+    <div className="bg-[#05060a]">
+      <Hero products={deals.length >= 3 ? deals : newest} />
+      <BentoDeals deals={deals} />
+      <CategoryIndex categories={categories} countByCategory={countByCategory} />
+      <NewRail products={newest} />
+      <Manifesto />
+      <FinalCta />
+    </div>
+  );
+}
 
-        <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-          <div className="animate-fade-up">
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/10 px-4 py-1.5 text-sm text-orange-300 font-medium">
-              <Zap size={14} />
-              Livraison express 24h à Dakar
-            </div>
+/* ================= HERO 3D ================= */
 
-            <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-tight">
-              La tech qu'il vous faut,
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">
-                au meilleur prix.
-              </span>
-            </h1>
+function Hero({ products }: { products: Product[] }) {
+  const ref = useRef<HTMLElement>(null);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
-            <p className="mt-5 text-lg text-gray-300 max-w-md">
-              Ordinateurs, smartphones, gaming et accessoires — payez à la
-              livraison, partout au Sénégal.
-            </p>
+  const onMouseMove = (e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setMouse({
+      x: (e.clientX - r.left) / r.width - 0.5,
+      y: (e.clientY - r.top) / r.height - 0.5,
+    });
+  };
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link
-                to="/shop"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-400 text-white font-semibold shadow-lg shadow-orange-500/30 transition hover:scale-105"
-              >
-                Découvrir la boutique
-                <ArrowRight size={18} />
-              </Link>
-              <a
-                href="#offres"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl border border-white/20 hover:bg-white/10 font-semibold transition"
-              >
-                <Flame size={18} className="text-orange-400" />
-                Voir les promos
-              </a>
-            </div>
+  const layer = (depth: number): React.CSSProperties => ({
+    transform: `translate3d(${(mouse.x * depth).toFixed(1)}px, ${(
+      mouse.y * depth
+    ).toFixed(1)}px, 0)`,
+    transition: "transform 0.25s ease-out",
+  });
 
-            {/* Stats */}
-            <div className="mt-10 flex gap-8 text-sm">
-              <div>
-                <div className="text-2xl font-extrabold">{products.length}+</div>
-                <div className="text-gray-400">Produits</div>
-              </div>
-              <div>
-                <div className="text-2xl font-extrabold">24h</div>
-                <div className="text-gray-400">Livraison express</div>
-              </div>
-              <div>
-                <div className="text-2xl font-extrabold">100%</div>
-                <div className="text-gray-400">Garantie</div>
-              </div>
-            </div>
+  const [main, second, third] = products;
+
+  return (
+    <section
+      ref={ref}
+      onMouseMove={onMouseMove}
+      className="relative overflow-hidden bg-mesh text-white min-h-[92vh] flex flex-col"
+    >
+      <div className="absolute inset-0 bg-grid" />
+
+      {/* Halo animé */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-[500px] w-[700px] rounded-full bg-orange-500/15 blur-3xl animate-pulse-glow" />
+
+      <div className="relative flex-1 max-w-6xl mx-auto px-4 w-full grid grid-cols-1 lg:grid-cols-2 items-center gap-12 py-20">
+        {/* Texte */}
+        <div className="animate-fade-up" style={layer(-12)}>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur px-4 py-1.5 text-sm text-gray-300">
+            <Zap size={14} className="text-orange-400" />
+            Nouvelle collection tech — 2026
           </div>
 
-          {/* Produit vedette flottant */}
-          {heroProduct && (
-            <div className="hidden md:block animate-fade-up delay-200">
-              <Link
-                to={`/product/${heroProduct._id}`}
-                className="block animate-float"
-              >
-                <div className="relative mx-auto max-w-sm rounded-3xl bg-white/10 backdrop-blur border border-white/15 p-6 shadow-2xl hover:border-orange-400/50 transition">
-                  {heroProduct.oldPrice && (
-                    <span className="absolute -top-3 -right-3 rounded-full bg-orange-500 text-white text-sm font-bold px-4 py-1.5 shadow-lg rotate-3">
-                      -
-                      {Math.round(
-                        ((heroProduct.oldPrice - heroProduct.price) /
-                          heroProduct.oldPrice) *
-                          100
-                      )}
-                      %
-                    </span>
-                  )}
-                  <div className="aspect-square rounded-2xl overflow-hidden bg-gray-800">
+          <h1 className="mt-8 font-extrabold leading-[0.95] text-5xl md:text-7xl">
+            <span className="block">FUTUR.</span>
+            <span className="block text-outline">PUISSANT.</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500">
+              ABORDABLE.
+            </span>
+          </h1>
+
+          <p className="mt-6 text-gray-400 max-w-md text-lg">
+            La tech de demain, livrée aujourd'hui chez vous. Payez à la
+            livraison, partout au Sénégal.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center gap-5">
+            <Link
+              to="/shop"
+              className="group inline-flex items-center gap-3 rounded-full bg-white text-gray-950 pl-7 pr-2 py-2 font-bold transition hover:bg-orange-400 hover:text-white"
+            >
+              Explorer
+              <span className="h-10 w-10 rounded-full bg-gray-950 text-white grid place-items-center transition group-hover:rotate-45">
+                <ArrowUpRight size={18} />
+              </span>
+            </Link>
+            <a
+              href="#offres"
+              className="text-sm text-gray-400 hover:text-white underline underline-offset-8 decoration-orange-500/60 transition"
+            >
+              Voir les offres →
+            </a>
+          </div>
+        </div>
+
+        {/* Scène 3D */}
+        <div className="relative hidden lg:block h-[520px]" style={{ perspective: "1200px" }}>
+          {/* Anneau décoratif */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[440px] w-[440px] rounded-full border border-dashed border-white/10 animate-spin-slow"
+            style={layer(-18)}
+          />
+
+          {/* Carte principale */}
+          {main && (
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 z-20"
+              style={layer(-30)}
+            >
+              <Tilt3D max={16} scale={1.04} className="rounded-3xl">
+                <Link
+                  to={`/product/${main._id}`}
+                  className="block rounded-3xl bg-white/[0.07] backdrop-blur-xl border border-white/15 p-5 shadow-2xl shadow-black/50"
+                >
+                  <div className="aspect-square rounded-2xl overflow-hidden">
                     <img
-                      src={buildImageUrl(heroProduct.images?.[0]?.url)}
-                      alt={heroProduct.name}
+                      src={buildImageUrl(main.images?.[0]?.url)}
+                      alt={main.name}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <div className="mt-4">
-                    <div className="font-bold text-lg line-clamp-1">
-                      {heroProduct.name}
+                  <div className="mt-4 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-bold truncate">{main.name}</div>
+                      <div className="text-orange-400 font-extrabold">
+                        {formatPrice(main.price)}
+                      </div>
                     </div>
-                    <div className="mt-1 flex items-center gap-3">
-                      {heroProduct.oldPrice && (
-                        <span className="text-gray-400 line-through text-sm">
-                          {formatPrice(heroProduct.oldPrice)}
-                        </span>
-                      )}
-                      <span className="text-orange-400 font-extrabold text-xl">
-                        {formatPrice(heroProduct.price)}
-                      </span>
-                    </div>
+                    <span className="h-10 w-10 shrink-0 rounded-full bg-orange-500 grid place-items-center">
+                      <ArrowUpRight size={18} />
+                    </span>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </Tilt3D>
+            </div>
+          )}
+
+          {/* Cartes satellites */}
+          {second && (
+            <div
+              className="absolute top-8 right-0 w-44 z-10 animate-float"
+              style={layer(24)}
+            >
+              <MiniFloatCard p={second} />
+            </div>
+          )}
+          {third && (
+            <div
+              className="absolute bottom-6 left-0 w-44 z-10 animate-float-slow"
+              style={layer(40)}
+            >
+              <MiniFloatCard p={third} />
             </div>
           )}
         </div>
+      </div>
 
-        {/* Bandeau défilant */}
-        <div className="relative border-t border-white/10 bg-white/5 py-3 overflow-hidden">
-          <div className="animate-marquee flex whitespace-nowrap text-sm text-gray-300">
-            {[...Array(2)].map((_, i) => (
-              <span key={i} className="flex shrink-0">
-                {[
-                  "🚚 Livraison partout au Sénégal",
-                  "💵 Paiement à la livraison",
-                  "✅ Produits 100% authentiques",
-                  "⚡ Express 24h à Dakar",
-                  "🎧 Support client 7j/7",
-                ].map((t) => (
-                  <span key={t} className="mx-8">
-                    {t}
-                  </span>
-                ))}
-              </span>
-            ))}
-          </div>
+      {/* Marquee bas de hero */}
+      <div className="relative border-t border-white/10 py-4 overflow-hidden">
+        <div className="animate-marquee flex whitespace-nowrap text-sm font-medium text-gray-500 uppercase tracking-[0.2em]">
+          {[...Array(2)].map((_, i) => (
+            <span key={i} className="flex shrink-0">
+              {[
+                "Livraison 24h Dakar",
+                "Paiement à la livraison",
+                "100% authentique",
+                "Support 7j/7",
+                "Mobile Money",
+              ].map((t) => (
+                <span key={t} className="mx-6 flex items-center gap-6">
+                  {t} <span className="text-orange-500">✦</span>
+                </span>
+              ))}
+            </span>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* ===== CATEGORIES ===== */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <SectionTitle
-          icon={<Sparkles className="text-orange-500" size={22} />}
-          title="Explorez nos univers"
-          subtitle="Trouvez exactement ce qu'il vous faut"
+function MiniFloatCard({ p }: { p: Product }) {
+  return (
+    <Link
+      to={`/product/${p._id}`}
+      className="block rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/10 p-3 shadow-xl hover:border-orange-400/40 transition"
+    >
+      <div className="aspect-square rounded-xl overflow-hidden">
+        <img
+          src={buildImageUrl(p.images?.[0]?.url)}
+          alt={p.name}
+          className="h-full w-full object-cover"
         />
+      </div>
+      <div className="mt-2 text-xs font-semibold text-white truncate">
+        {p.name}
+      </div>
+      <div className="text-xs text-orange-400 font-bold">
+        {formatPrice(p.price)}
+      </div>
+    </Link>
+  );
+}
 
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4">
-          {categories.map((c) => (
+/* ================= BENTO OFFRES ================= */
+
+function BentoDeals({ deals }: { deals: Product[] }) {
+  if (deals.length === 0) return null;
+  const [big, ...rest] = deals;
+
+  return (
+    <section id="offres" className="relative bg-[#05060a] text-white">
+      <div className="max-w-6xl mx-auto px-4 py-20">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-orange-400 text-sm font-semibold uppercase tracking-widest">
+              <Flame size={16} /> Offres du moment
+            </div>
+            <h2 className="mt-3 text-3xl md:text-5xl font-extrabold">
+              Jusqu'à -
+              {Math.max(
+                ...deals.map((d) =>
+                  Math.round(((d.oldPrice! - d.price) / d.oldPrice!) * 100)
+                )
+              )}
+              % <span className="text-outline">cette semaine</span>
+            </h2>
+          </div>
+          <Link
+            to="/shop"
+            className="hidden md:inline-flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition whitespace-nowrap"
+          >
+            Tout le catalogue <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        {/* Bento grid */}
+        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 auto-rows-[180px] md:auto-rows-[200px] gap-4">
+          {/* Grande carte */}
+          <BentoCard p={big} className="col-span-2 row-span-2" big />
+
+          {rest.slice(0, 4).map((p) => (
+            <BentoCard key={p._id} p={p} className="col-span-1 row-span-1" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BentoCard({
+  p,
+  className = "",
+  big = false,
+}: {
+  p: Product;
+  className?: string;
+  big?: boolean;
+}) {
+  const { addItem } = useCart();
+  const discount = Math.round(((p.oldPrice! - p.price) / p.oldPrice!) * 100);
+
+  return (
+    <Tilt3D max={8} className={`rounded-3xl ${className}`}>
+      <div className="group relative h-full w-full rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04]">
+        <img
+          src={buildImageUrl(p.images?.[0]?.url)}
+          alt={p.name}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+
+        {/* Badge réduction */}
+        <span
+          className={`absolute top-4 left-4 rounded-full bg-orange-500 font-extrabold text-white shadow-lg ${
+            big ? "text-lg px-5 py-2" : "text-xs px-3 py-1"
+          }`}
+        >
+          -{discount}%
+        </span>
+
+        {/* Bouton ajout rapide */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            addItem(p);
+          }}
+          aria-label="Ajouter au panier"
+          className="absolute top-4 right-4 h-9 w-9 rounded-full bg-white/10 backdrop-blur border border-white/20 grid place-items-center opacity-0 group-hover:opacity-100 hover:bg-orange-500 hover:border-orange-500 transition"
+        >
+          <Plus size={16} />
+        </button>
+
+        <Link
+          to={`/product/${p._id}`}
+          className="absolute inset-x-0 bottom-0 p-5"
+        >
+          <div
+            className={`font-extrabold leading-tight ${
+              big ? "text-2xl md:text-3xl" : "text-sm"
+            } line-clamp-2`}
+          >
+            {p.name}
+          </div>
+          <div className="mt-1 flex items-baseline gap-2">
+            <span
+              className={`text-gray-400 line-through ${
+                big ? "text-sm" : "text-[11px]"
+              }`}
+            >
+              {formatPrice(p.oldPrice!)}
+            </span>
+            <span
+              className={`font-extrabold text-orange-400 ${
+                big ? "text-2xl" : "text-sm"
+              }`}
+            >
+              {formatPrice(p.price)}
+            </span>
+          </div>
+        </Link>
+      </div>
+    </Tilt3D>
+  );
+}
+
+/* ================= INDEX CATEGORIES ================= */
+
+function CategoryIndex({
+  categories,
+  countByCategory,
+}: {
+  categories: Category[];
+  countByCategory: Map<string, number>;
+}) {
+  return (
+    <section className="bg-[#05060a] text-white">
+      <div className="max-w-6xl mx-auto px-4 py-20">
+        <div className="flex items-center gap-2 text-orange-400 text-sm font-semibold uppercase tracking-widest">
+          <Sparkles size={16} /> Univers
+        </div>
+
+        <div className="mt-8 border-t border-white/10">
+          {categories.map((c, i) => (
             <Link
               key={c._id}
               to={`/shop?category=${c._id}`}
-              className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${
-                CATEGORY_COLORS[c.slug] ?? "from-gray-600 to-gray-800"
-              } p-5 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
+              className="group flex items-center justify-between gap-4 border-b border-white/10 py-7 md:py-9 transition-colors hover:border-orange-500/50"
             >
-              <div className="absolute -bottom-4 -right-4 opacity-20 scale-[2.5] group-hover:scale-[2.8] group-hover:rotate-6 transition-transform duration-500">
-                {CATEGORY_ICONS[c.slug] ?? <Sparkles size={28} />}
+              <div className="flex items-baseline gap-6 min-w-0">
+                <span className="text-sm text-gray-600 font-mono">
+                  0{i + 1}
+                </span>
+                <span className="text-3xl md:text-6xl font-extrabold tracking-tight text-gray-500 transition-all duration-300 group-hover:text-white group-hover:translate-x-3">
+                  {c.name}
+                </span>
               </div>
-              <div className="relative">
-                {CATEGORY_ICONS[c.slug] ?? <Sparkles size={28} />}
-                <div className="mt-3 font-bold">{c.name}</div>
-                <div className="mt-1 text-xs text-white/70 inline-flex items-center gap-1">
-                  Découvrir <ArrowRight size={12} />
-                </div>
+
+              <div className="flex items-center gap-5 shrink-0">
+                <span className="hidden sm:block text-sm text-gray-600">
+                  {countByCategory.get(c._id) ?? 0} produits
+                </span>
+                <span className="h-12 w-12 rounded-full border border-white/15 grid place-items-center transition-all duration-300 group-hover:bg-orange-500 group-hover:border-orange-500 group-hover:rotate-45">
+                  <ArrowUpRight size={18} />
+                </span>
               </div>
             </Link>
           ))}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* ===== OFFRES ===== */}
-      {deals.length > 0 && (
-        <section id="offres" className="bg-gray-100/70 border-y">
-          <div className="max-w-6xl mx-auto px-4 py-16">
-            <div className="flex items-end justify-between gap-4">
-              <SectionTitle
-                icon={<Flame className="text-orange-500" size={22} />}
-                title="Offres du moment"
-                subtitle="Des réductions à ne pas rater — stocks limités"
-              />
-              <Link
-                to="/shop"
-                className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-orange-500 hover:text-orange-600 whitespace-nowrap"
-              >
-                Tout voir <ArrowRight size={14} />
-              </Link>
+/* ================= RAIL NOUVEAUTES ================= */
+
+function NewRail({ products }: { products: Product[] }) {
+  if (products.length === 0) return null;
+
+  return (
+    <section className="bg-[#05060a] text-white overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 pt-8 pb-4 flex items-end justify-between">
+        <h2 className="text-3xl md:text-5xl font-extrabold">
+          Nouveautés <span className="text-outline">fraîches</span>
+        </h2>
+        <span className="hidden md:block text-sm text-gray-500 pb-2">
+          ← Faites défiler →
+        </span>
+      </div>
+
+      <div className="scrollbar-hide overflow-x-auto snap-x snap-mandatory pb-20 pt-6">
+        <div className="flex gap-5 px-[max(1rem,calc((100vw-72rem)/2+1rem))]">
+          {products.map((p) => (
+            <div key={p._id} className="snap-start shrink-0 w-64">
+              <Tilt3D max={10} className="rounded-3xl">
+                <RailCard p={p} />
+              </Tilt3D>
             </div>
+          ))}
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {deals.map((p) => (
-                <ProductCard key={p._id} p={p} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          {/* Carte "voir tout" */}
+          <Link
+            to="/shop"
+            className="snap-start shrink-0 w-64 rounded-3xl border border-dashed border-white/20 grid place-items-center text-gray-400 hover:text-white hover:border-orange-500/60 transition min-h-[340px]"
+          >
+            <span className="flex flex-col items-center gap-3">
+              <span className="h-14 w-14 rounded-full border border-white/20 grid place-items-center">
+                <ArrowRight size={20} />
+              </span>
+              Tout le catalogue
+            </span>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-      {/* ===== CONFIANCE ===== */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <TrustCard
-            icon={<Truck size={26} />}
-            title="Livraison rapide"
-            text="Express 24h à Dakar, 2-4 jours partout au Sénégal."
-          />
-          <TrustCard
-            icon={<HandCoins size={26} />}
-            title="Paiement à la livraison"
-            text="Payez en cash ou mobile money à la réception."
-          />
-          <TrustCard
-            icon={<ShieldCheck size={26} />}
-            title="Produits garantis"
-            text="100% authentiques, vérifiés avant expédition."
-          />
-          <TrustCard
-            icon={<Headphones size={26} />}
-            title="Support 7j/7"
-            text="Une question ? Notre équipe vous répond rapidement."
+function RailCard({ p }: { p: Product }) {
+  const { addItem } = useCart();
+  const outOfStock = p.stock <= 0;
+
+  return (
+    <div className="group relative rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04]">
+      <Link to={`/product/${p._id}`} className="block">
+        <div className="aspect-square overflow-hidden">
+          <img
+            src={buildImageUrl(p.images?.[0]?.url)}
+            alt={p.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
           />
         </div>
-      </section>
+      </Link>
 
-      {/* ===== NOUVEAUTES ===== */}
-      {newest.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 pb-16">
-          <div className="flex items-end justify-between gap-4">
-            <SectionTitle
-              icon={<Sparkles className="text-orange-500" size={22} />}
-              title="Nouveautés"
-              subtitle="Les derniers produits arrivés en boutique"
-            />
-            <Link
-              to="/shop"
-              className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-orange-500 hover:text-orange-600 whitespace-nowrap"
-            >
-              Tout voir <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {newest.map((p) => (
-              <ProductCard key={p._id} p={p} />
-            ))}
-          </div>
-        </section>
+      {outOfStock && (
+        <span className="absolute top-3 left-3 rounded-full bg-red-600/90 text-white text-[11px] px-3 py-1 font-semibold">
+          Rupture
+        </span>
       )}
 
-      {/* ===== CTA FINAL ===== */}
-      <section className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="relative overflow-hidden rounded-3xl bg-gray-950 text-white px-8 py-12 md:px-14 md:py-16">
-          <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-orange-500/30 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-
-          <div className="relative md:flex items-center justify-between gap-8">
-            <div>
-              <h2 className="text-2xl md:text-4xl font-extrabold">
-                Prêt à vous équiper ?
-              </h2>
-              <p className="mt-3 text-gray-300 max-w-lg">
-                Commandez maintenant et recevez votre matériel en 24h à Dakar.
-                Payez uniquement à la réception.
-              </p>
-            </div>
-            <Link
-              to="/shop"
-              className="mt-6 md:mt-0 inline-flex shrink-0 items-center gap-2 px-8 py-4 rounded-2xl bg-orange-500 hover:bg-orange-400 font-bold shadow-lg shadow-orange-500/30 transition hover:scale-105"
-            >
-              Commander maintenant
-              <ArrowRight size={18} />
-            </Link>
+      <div className="p-4 flex items-center justify-between gap-3">
+        <Link to={`/product/${p._id}`} className="min-w-0">
+          <div className="text-sm font-bold truncate group-hover:text-orange-400 transition">
+            {p.name}
           </div>
-        </div>
-      </section>
+          <div className="text-orange-400 font-extrabold text-sm mt-0.5">
+            {formatPrice(p.price)}
+          </div>
+        </Link>
+        <button
+          onClick={() => addItem(p)}
+          disabled={outOfStock}
+          aria-label="Ajouter au panier"
+          className="h-9 w-9 shrink-0 rounded-full bg-white/10 border border-white/15 grid place-items-center hover:bg-orange-500 hover:border-orange-500 transition disabled:opacity-30"
+        >
+          <Plus size={16} />
+        </button>
+      </div>
     </div>
   );
 }
 
-function SectionTitle({
-  icon,
-  title,
-  subtitle,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-}) {
+/* ================= MANIFESTO ================= */
+
+function Manifesto() {
+  const items = [
+    { n: "01", t: "Livraison éclair", d: "24h à Dakar, 2-4 jours partout au Sénégal." },
+    { n: "02", t: "Zéro risque", d: "Payez uniquement à la réception, cash ou mobile money." },
+    { n: "03", t: "Authentique", d: "Chaque produit est vérifié avant expédition." },
+    { n: "04", t: "À vos côtés", d: "Support réactif 7j/7, avant et après l'achat." },
+  ];
+
   return (
-    <div>
-      <div className="flex items-center gap-2">
-        {icon}
-        <h2 className="text-2xl md:text-3xl font-extrabold">{title}</h2>
+    <section className="bg-[#05060a] text-white border-t border-white/10">
+      <div className="max-w-6xl mx-auto px-4 py-20 grid grid-cols-1 md:grid-cols-4 gap-10">
+        {items.map((it) => (
+          <div key={it.n} className="group">
+            <div className="text-sm font-mono text-orange-500">{it.n}</div>
+            <div className="mt-3 h-px w-10 bg-white/20 transition-all duration-500 group-hover:w-full group-hover:bg-orange-500/60" />
+            <h3 className="mt-4 font-extrabold text-lg">{it.t}</h3>
+            <p className="mt-2 text-sm text-gray-500">{it.d}</p>
+          </div>
+        ))}
       </div>
-      <p className="mt-1 text-gray-500">{subtitle}</p>
-    </div>
+    </section>
   );
 }
 
-function TrustCard({
-  icon,
-  title,
-  text,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-}) {
+/* ================= CTA FINAL ================= */
+
+function FinalCta() {
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-      <div className="h-12 w-12 rounded-xl bg-orange-100 text-orange-500 grid place-items-center">
-        {icon}
+    <section className="relative bg-[#05060a] text-white overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 pb-24 pt-4 text-center">
+        <div className="relative rounded-[2.5rem] border border-white/10 bg-mesh px-6 py-16 md:py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-grid" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-40 w-[500px] bg-orange-500/20 blur-3xl" />
+
+          <h2 className="relative text-4xl md:text-6xl font-extrabold leading-tight">
+            Passez au niveau
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">
+              supérieur.
+            </span>
+          </h2>
+          <p className="relative mt-5 text-gray-400 max-w-md mx-auto">
+            Commandez maintenant, recevez en 24h à Dakar et payez à la
+            réception.
+          </p>
+
+          <Link
+            to="/shop"
+            className="relative group mt-10 inline-flex items-center gap-3 rounded-full bg-orange-500 pl-8 pr-2 py-2 font-bold text-white transition hover:bg-orange-400 hover:scale-105 shadow-xl shadow-orange-500/25"
+          >
+            Commander maintenant
+            <span className="h-11 w-11 rounded-full bg-gray-950 grid place-items-center transition group-hover:rotate-45">
+              <ArrowUpRight size={18} />
+            </span>
+          </Link>
+        </div>
       </div>
-      <div className="mt-4 font-bold">{title}</div>
-      <p className="mt-1 text-sm text-gray-500">{text}</p>
-    </div>
+    </section>
   );
 }
