@@ -13,7 +13,7 @@ export default function Cart() {
         <h1 className="text-3xl md:text-4xl font-extrabold">
           Votre panier est <span className="text-orange-400">vide</span>
         </h1>
-        <p className="text-gray-500 mt-3">
+        <p className="text-faint mt-3">
           Parcourez la boutique pour trouver votre bonheur.
         </p>
         <Link
@@ -38,11 +38,11 @@ export default function Cart() {
           {items.map(({ product, qty }) => (
             <div
               key={product._id}
-              className="bg-white/[0.04] border border-white/10 rounded-2xl p-4 flex gap-4 items-center hover:border-white/20 transition"
+              className="bg-card border border-app rounded-2xl p-4 flex gap-4 items-center hover:border-orange-500/30 transition"
             >
               <Link
                 to={`/product/${product._id}`}
-                className="h-24 w-24 rounded-xl overflow-hidden bg-white/5 shrink-0"
+                className="h-24 w-24 rounded-xl overflow-hidden bg-card-2 shrink-0"
               >
                 <img
                   src={buildImageUrl(product.images?.[0]?.url)}
@@ -58,12 +58,12 @@ export default function Cart() {
                 >
                   {product.name}
                 </Link>
-                <div className="text-sm text-gray-500 mt-1">
+                <div className="text-sm text-faint mt-1">
                   {formatPrice(product.price)} / unité
                 </div>
 
                 <div className="mt-2 flex items-center gap-3">
-                  <div className="flex items-center border border-white/15 rounded-lg bg-white/5">
+                  <div className="flex items-center border border-app-strong rounded-lg bg-card-2">
                     <button
                       className="p-2 hover:text-orange-400 disabled:opacity-40 transition"
                       onClick={() => setQty(product._id, qty - 1)}
@@ -87,7 +87,7 @@ export default function Cart() {
 
                   <button
                     onClick={() => removeItem(product._id)}
-                    className="text-gray-500 hover:text-red-400 transition"
+                    className="text-faint hover:text-red-400 transition"
                     aria-label="Retirer du panier"
                   >
                     <Trash2 size={18} />
@@ -103,24 +103,24 @@ export default function Cart() {
 
           <button
             onClick={clear}
-            className="text-sm text-gray-500 hover:text-red-400 underline underline-offset-4 transition"
+            className="text-sm text-faint hover:text-red-400 underline underline-offset-4 transition"
           >
             Vider le panier
           </button>
         </div>
 
         {/* Résumé */}
-        <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 h-fit">
+        <div className="bg-card border border-app rounded-2xl p-6 h-fit">
           <h2 className="font-bold text-lg">Résumé</h2>
 
           <div className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Sous-total</span>
+              <span className="text-muted">Sous-total</span>
               <span className="font-semibold">{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Livraison</span>
-              <span className="text-gray-500">Calculée au paiement</span>
+              <span className="text-muted">Livraison</span>
+              <span className="text-faint">Calculée au paiement</span>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export default function Cart() {
 
           <Link
             to="/shop"
-            className="mt-3 block text-center text-sm text-gray-500 hover:text-white transition"
+            className="mt-3 block text-center text-sm text-faint hover-text-app transition"
           >
             Continuer mes achats
           </Link>

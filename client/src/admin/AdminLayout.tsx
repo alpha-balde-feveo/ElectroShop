@@ -56,7 +56,7 @@ export default function AdminLayout() {
     }`;
 
   return (
-    <div className="min-h-screen bg-[#05060a] text-white relative">
+    <div className="dark-scope min-h-screen bg-[#05060a] text-white relative">
       {/* Fond ambiant */}
       <div className="pointer-events-none fixed inset-0 bg-grid" />
       <div className="pointer-events-none fixed -top-40 left-1/4 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />

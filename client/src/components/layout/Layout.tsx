@@ -7,7 +7,7 @@ export default function Layout() {
   const fullBleed = pathname === "/"; // la page d'accueil gère sa propre mise en page
 
   return (
-    <div className="min-h-screen bg-[#05060a] text-white flex flex-col">
+    <div className="min-h-screen bg-app text-app flex flex-col">
       <Header />
       <main
         className={

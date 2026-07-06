@@ -43,7 +43,7 @@ export default function ProductDetail() {
     };
   }, [id]);
 
-  if (loading) return <div className="text-gray-400">Chargement...</div>;
+  if (loading) return <div className="text-muted">Chargement...</div>;
   if (error || !product)
     return (
       <div>
@@ -77,8 +77,8 @@ export default function ProductDetail() {
 
   return (
     <div>
-      <div className="text-sm text-gray-500 mb-6">
-        <Link to="/shop" className="hover:text-white">
+      <div className="text-sm text-faint mb-6">
+        <Link to="/shop" className="hover-text-app">
           Boutique
         </Link>{" "}
         / {product.name}
@@ -87,7 +87,7 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Images */}
         <div>
-          <div className="aspect-square bg-white/5 rounded-3xl overflow-hidden border border-white/10">
+          <div className="aspect-square bg-card-2 rounded-3xl overflow-hidden border border-app">
             <img
               src={mainImg}
               alt={product.name}
@@ -123,12 +123,12 @@ export default function ProductDetail() {
           )}
           <h1 className="text-3xl font-bold mt-1">{product.name}</h1>
           {product.brand && (
-            <div className="text-gray-500 mt-1">Marque : {product.brand}</div>
+            <div className="text-faint mt-1">Marque : {product.brand}</div>
           )}
 
           <div className="mt-4 flex items-center gap-3">
             {product.oldPrice && product.oldPrice > product.price && (
-              <span className="text-lg text-gray-500 line-through">
+              <span className="text-lg text-faint line-through">
                 {formatPrice(product.oldPrice)}
               </span>
             )}
@@ -148,14 +148,14 @@ export default function ProductDetail() {
           </div>
 
           {product.description && (
-            <p className="mt-4 text-gray-400 leading-relaxed">
+            <p className="mt-4 text-muted leading-relaxed">
               {product.description}
             </p>
           )}
 
           {/* Quantité + Ajouter */}
           <div className="mt-6 flex items-center gap-4">
-            <div className="flex items-center border border-white/15 rounded-xl bg-white/5">
+            <div className="flex items-center border border-app-strong rounded-xl bg-card-2">
               <button
                 className="p-3 hover:text-orange-500 disabled:opacity-40"
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -198,14 +198,14 @@ export default function ProductDetail() {
           {specs.length > 0 && (
             <div className="mt-8">
               <h2 className="font-bold text-lg mb-3">Caractéristiques</h2>
-              <table className="w-full text-sm border border-white/10 rounded-xl overflow-hidden">
+              <table className="w-full text-sm border border-app rounded-xl overflow-hidden">
                 <tbody>
                   {specs.map(([k, v]) => (
-                    <tr key={k} className="odd:bg-white/[0.04]">
-                      <td className="px-4 py-2.5 font-medium text-gray-300 capitalize">
+                    <tr key={k} className="odd:bg-card">
+                      <td className="px-4 py-2.5 font-medium text-soft capitalize">
                         {k}
                       </td>
-                      <td className="px-4 py-2.5 text-gray-500">{String(v)}</td>
+                      <td className="px-4 py-2.5 text-faint">{String(v)}</td>
                     </tr>
                   ))}
                 </tbody>

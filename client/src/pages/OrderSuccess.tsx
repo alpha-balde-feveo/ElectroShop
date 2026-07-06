@@ -15,30 +15,30 @@ export default function OrderSuccess() {
       <h1 className="text-3xl md:text-4xl font-extrabold mt-6">
         Commande <span className="text-orange-400">confirmée !</span>
       </h1>
-      <p className="text-gray-400 mt-3">
+      <p className="text-muted mt-3">
         Merci pour votre confiance. Nous vous contacterons rapidement pour la
         livraison.
       </p>
 
       {order && (
-        <div className="mt-8 bg-white/[0.04] border border-white/10 rounded-2xl p-6 text-left text-sm">
+        <div className="mt-8 bg-card border border-app rounded-2xl p-6 text-left text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-400">N° de commande</span>
+            <span className="text-muted">N° de commande</span>
             <span className="font-mono font-medium">{order._id}</span>
           </div>
           <div className="flex justify-between mt-2">
-            <span className="text-gray-400">Client</span>
+            <span className="text-muted">Client</span>
             <span className="font-medium">{order.customerName}</span>
           </div>
           <div className="flex justify-between mt-2">
-            <span className="text-gray-400">Téléphone</span>
+            <span className="text-muted">Téléphone</span>
             <span className="font-medium">{order.phone}</span>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
+          <div className="mt-4 pt-4 border-t border-app space-y-1">
             {order.items.map((it, i) => (
               <div key={i} className="flex justify-between">
-                <span className="text-gray-400">
+                <span className="text-muted">
                   {it.nameSnapshot} × {it.qty}
                 </span>
                 <span>{formatPrice(it.priceSnapshot * it.qty)}</span>
@@ -46,9 +46,9 @@ export default function OrderSuccess() {
             ))}
           </div>
 
-          <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
+          <div className="mt-4 pt-4 border-t border-app space-y-1">
             <div className="flex justify-between">
-              <span className="text-gray-400">Sous-total</span>
+              <span className="text-muted">Sous-total</span>
               <span>{formatPrice(order.subtotal)}</span>
             </div>
             {order.discount > 0 && (
@@ -58,10 +58,10 @@ export default function OrderSuccess() {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-400">Livraison</span>
+              <span className="text-muted">Livraison</span>
               <span>{formatPrice(order.shippingFee)}</span>
             </div>
-            <div className="flex justify-between font-bold pt-2 border-t border-white/10">
+            <div className="flex justify-between font-bold pt-2 border-t border-app">
               <span>Total</span>
               <span className="text-orange-400">{formatPrice(order.total)}</span>
             </div>

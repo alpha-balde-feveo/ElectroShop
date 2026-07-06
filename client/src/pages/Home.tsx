@@ -69,7 +69,7 @@ export default function Home() {
   }, [products]);
 
   return (
-    <div className="bg-[#05060a]">
+    <div className="bg-app">
       <Hero products={deals.length >= 3 ? deals : newest} />
       <BentoDeals deals={deals} />
       <CategoryIndex categories={categories} countByCategory={countByCategory} />
@@ -109,7 +109,7 @@ function Hero({ products }: { products: Product[] }) {
     <section
       ref={ref}
       onMouseMove={onMouseMove}
-      className="relative overflow-hidden bg-mesh text-white min-h-[92vh] flex flex-col"
+      className="dark-scope relative overflow-hidden bg-mesh text-white min-h-[92vh] flex flex-col"
     >
       <div className="absolute inset-0 bg-grid" />
 
@@ -272,7 +272,7 @@ function BentoDeals({ deals }: { deals: Product[] }) {
   const [big, ...rest] = deals;
 
   return (
-    <section id="offres" className="relative bg-[#05060a] text-white">
+    <section id="offres" className="relative bg-app text-app">
       <div className="max-w-6xl mx-auto px-4 py-20">
         <div className="flex items-end justify-between">
           <div>
@@ -291,7 +291,7 @@ function BentoDeals({ deals }: { deals: Product[] }) {
           </div>
           <Link
             to="/shop"
-            className="hidden md:inline-flex items-center gap-1 text-sm text-gray-400 hover:text-orange-400 transition whitespace-nowrap"
+            className="hidden md:inline-flex items-center gap-1 text-sm text-muted hover:text-orange-400 transition whitespace-nowrap"
           >
             Tout le catalogue <ArrowRight size={14} />
           </Link>
@@ -406,33 +406,33 @@ function CategoryIndex({
   countByCategory: Map<string, number>;
 }) {
   return (
-    <section className="bg-[#05060a] text-white">
+    <section className="bg-app text-app">
       <div className="max-w-6xl mx-auto px-4 py-20">
         <div className="flex items-center gap-2 text-orange-400 text-sm font-semibold uppercase tracking-widest">
           <Sparkles size={16} /> Univers
         </div>
 
-        <div className="mt-8 border-t border-white/10">
+        <div className="mt-8 border-t border-app">
           {categories.map((c, i) => (
             <Link
               key={c._id}
               to={`/shop?category=${c._id}`}
-              className="group flex items-center justify-between gap-4 border-b border-white/10 py-7 md:py-9 transition-colors hover:border-orange-500/50"
+              className="group flex items-center justify-between gap-4 border-b border-app py-7 md:py-9 transition-colors hover:border-orange-500/50"
             >
               <div className="flex items-baseline gap-6 min-w-0">
-                <span className="text-sm text-gray-600 font-mono">
+                <span className="text-sm text-faint font-mono">
                   0{i + 1}
                 </span>
-                <span className="text-3xl md:text-6xl font-extrabold tracking-tight text-gray-500 transition-all duration-300 group-hover:text-white group-hover:translate-x-3">
+                <span className="group-hover-text-app text-3xl md:text-6xl font-extrabold tracking-tight text-faint transition-all duration-300 group-hover:translate-x-3">
                   {c.name}
                 </span>
               </div>
 
               <div className="flex items-center gap-5 shrink-0">
-                <span className="hidden sm:block text-sm text-gray-600">
+                <span className="hidden sm:block text-sm text-faint">
                   {countByCategory.get(c._id) ?? 0} produits
                 </span>
-                <span className="h-12 w-12 rounded-full border border-white/15 grid place-items-center transition-all duration-300 group-hover:bg-orange-500 group-hover:border-orange-500 group-hover:rotate-45">
+                <span className="h-12 w-12 rounded-full border border-app-strong grid place-items-center transition-all duration-300 group-hover:bg-orange-500 group-hover:border-orange-500 group-hover:rotate-45 group-hover:text-white">
                   <ArrowUpRight size={18} />
                 </span>
               </div>
@@ -450,12 +450,12 @@ function NewRail({ products }: { products: Product[] }) {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-[#05060a] text-white overflow-hidden">
+    <section className="bg-app text-app overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 pt-8 pb-4 flex items-end justify-between">
         <h2 className="text-3xl md:text-5xl font-extrabold">
           Nouveautés <span className="text-outline">fraîches</span>
         </h2>
-        <span className="hidden md:block text-sm text-gray-500 pb-2">
+        <span className="hidden md:block text-sm text-faint pb-2">
           ← Faites défiler →
         </span>
       </div>
@@ -473,10 +473,10 @@ function NewRail({ products }: { products: Product[] }) {
           {/* Carte "voir tout" */}
           <Link
             to="/shop"
-            className="snap-start shrink-0 w-64 rounded-3xl border border-dashed border-white/20 grid place-items-center text-gray-400 hover:text-white hover:border-orange-500/60 transition min-h-[340px]"
+            className="hover-text-app snap-start shrink-0 w-64 rounded-3xl border border-dashed border-app-strong grid place-items-center text-muted hover:border-orange-500/60 transition min-h-[340px]"
           >
             <span className="flex flex-col items-center gap-3">
-              <span className="h-14 w-14 rounded-full border border-white/20 grid place-items-center">
+              <span className="h-14 w-14 rounded-full border border-app-strong grid place-items-center">
                 <ArrowRight size={20} />
               </span>
               Tout le catalogue
@@ -493,7 +493,7 @@ function RailCard({ p }: { p: Product }) {
   const outOfStock = p.stock <= 0;
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04]">
+    <div className="group relative rounded-3xl overflow-hidden border border-app bg-card">
       <Link to={`/product/${p._id}`} className="block">
         <div className="aspect-square overflow-hidden">
           <img
@@ -524,7 +524,7 @@ function RailCard({ p }: { p: Product }) {
           onClick={() => addItem(p)}
           disabled={outOfStock}
           aria-label="Ajouter au panier"
-          className="h-9 w-9 shrink-0 rounded-full bg-white/10 border border-white/15 grid place-items-center hover:bg-orange-500 hover:border-orange-500 transition disabled:opacity-30"
+          className="h-9 w-9 shrink-0 rounded-full bg-card-2 border border-app-strong grid place-items-center hover:bg-orange-500 hover:border-orange-500 hover:text-white transition disabled:opacity-30"
         >
           <Plus size={16} />
         </button>
@@ -544,14 +544,14 @@ function Manifesto() {
   ];
 
   return (
-    <section className="bg-[#05060a] text-white border-t border-white/10">
+    <section className="bg-app text-app border-t border-app">
       <div className="max-w-6xl mx-auto px-4 py-20 grid grid-cols-1 md:grid-cols-4 gap-10">
         {items.map((it) => (
           <div key={it.n} className="group">
             <div className="text-sm font-mono text-orange-500">{it.n}</div>
-            <div className="mt-3 h-px w-10 bg-white/20 transition-all duration-500 group-hover:w-full group-hover:bg-orange-500/60" />
+            <div className="mt-3 h-px w-10 bg-[color-mix(in_srgb,var(--app-text)_25%,transparent)] transition-all duration-500 group-hover:w-full group-hover:bg-orange-500/60" />
             <h3 className="mt-4 font-extrabold text-lg">{it.t}</h3>
-            <p className="mt-2 text-sm text-gray-500">{it.d}</p>
+            <p className="mt-2 text-sm text-faint">{it.d}</p>
           </div>
         ))}
       </div>
@@ -563,9 +563,9 @@ function Manifesto() {
 
 function FinalCta() {
   return (
-    <section className="relative bg-[#05060a] text-white overflow-hidden">
+    <section className="relative bg-app text-white overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 pb-24 pt-4 text-center">
-        <div className="relative rounded-[2.5rem] border border-white/10 bg-mesh px-6 py-16 md:py-24 overflow-hidden">
+        <div className="dark-scope relative rounded-[2.5rem] border border-white/10 bg-mesh px-6 py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-grid" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-40 w-[500px] bg-orange-500/20 blur-3xl" />
 

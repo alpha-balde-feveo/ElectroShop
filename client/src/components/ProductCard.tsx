@@ -16,9 +16,9 @@ export default function ProductCard({ p }: { p: Product }) {
       : 0;
 
   return (
-    <div className="group/card bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden hover:border-orange-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300">
+    <div className="group/card bg-card border border-app rounded-2xl overflow-hidden hover:border-orange-500/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300">
       {/* Image */}
-      <div className="group relative aspect-square bg-white/5 overflow-hidden">
+      <div className="group relative aspect-square bg-card-2 overflow-hidden">
         <Link to={`/product/${p._id}`}>
           <img
             src={img}
@@ -68,16 +68,16 @@ export default function ProductCard({ p }: { p: Product }) {
       {/* Content */}
       <div className="p-4 text-center">
         <Link to={`/product/${p._id}`}>
-          <h3 className="font-extrabold uppercase tracking-wide line-clamp-1 text-white group-hover/card:text-orange-400 transition">
+          <h3 className="font-extrabold uppercase tracking-wide line-clamp-1 text-app group-hover/card:text-orange-400 transition">
             {p.name}
           </h3>
         </Link>
 
-        {p.brand && <p className="text-sm text-gray-500 mt-2">{p.brand}</p>}
+        {p.brand && <p className="text-sm text-faint mt-2">{p.brand}</p>}
 
         <div className="mt-3 flex items-center justify-center gap-2">
           {discount > 0 && (
-            <span className="text-sm text-gray-500 line-through">
+            <span className="text-sm text-faint line-through">
               {formatPrice(p.oldPrice!)}
             </span>
           )}

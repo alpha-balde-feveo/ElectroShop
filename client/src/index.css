@@ -1,5 +1,95 @@
 @import "tailwindcss";
 
+/* ===== Tokens de thème (sombre par défaut) ===== */
+:root,
+[data-theme="dark"] {
+  --app-bg: #05060a;
+  --app-surface: rgba(255, 255, 255, 0.04);
+  --app-surface-2: rgba(255, 255, 255, 0.08);
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-border-strong: rgba(255, 255, 255, 0.18);
+  --app-text: #ffffff;
+  --app-text-soft: #d1d5db;
+  --app-muted: #9ca3af;
+  --app-faint: #6b7280;
+  --app-card-shadow: none;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --app-bg: #f4f5f7;
+  --app-surface: #ffffff;
+  --app-surface-2: #eceef2;
+  --app-border: #e2e5ea;
+  --app-border-strong: #cdd2da;
+  --app-text: #0f172a;
+  --app-text-soft: #334155;
+  --app-muted: #5b6472;
+  --app-faint: #8b93a1;
+  --app-card-shadow: 0 1px 3px rgba(16, 24, 40, 0.07);
+  color-scheme: light;
+}
+
+/* Zone toujours sombre (hero, CTA, admin) quel que soit le thème */
+.dark-scope {
+  --app-bg: #05060a;
+  --app-surface: rgba(255, 255, 255, 0.04);
+  --app-surface-2: rgba(255, 255, 255, 0.08);
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-border-strong: rgba(255, 255, 255, 0.18);
+  --app-text: #ffffff;
+  --app-text-soft: #d1d5db;
+  --app-muted: #9ca3af;
+  --app-faint: #6b7280;
+  --app-card-shadow: none;
+  color-scheme: dark;
+}
+
+/* Utilitaires liés au thème */
+.bg-app {
+  background-color: var(--app-bg);
+}
+.bg-card {
+  background-color: var(--app-surface);
+  box-shadow: var(--app-card-shadow);
+}
+.bg-card-2 {
+  background-color: var(--app-surface-2);
+}
+.hover-card-2:hover {
+  background-color: var(--app-surface-2);
+}
+.border-app {
+  border-color: var(--app-border);
+}
+.border-app-strong {
+  border-color: var(--app-border-strong);
+}
+.text-app {
+  color: var(--app-text);
+}
+.text-soft {
+  color: var(--app-text-soft);
+}
+.text-muted {
+  color: var(--app-muted);
+}
+.text-faint {
+  color: var(--app-faint);
+}
+.hover-text-app:hover {
+  color: var(--app-text);
+}
+.group:hover .group-hover-text-app {
+  color: var(--app-text);
+}
+
+/* Les listes déroulantes suivent le thème */
+option {
+  background-color: var(--app-surface);
+  color: var(--app-text);
+}
+
 /* ===== Animations ===== */
 @keyframes float {
   0%,
@@ -118,8 +208,9 @@
   background-size: 56px 56px;
 }
 
-/* Texte avec contour (style éditorial) */
+/* Texte avec contour (style éditorial) — suit le thème */
 .text-outline {
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.25);
+  -webkit-text-stroke: 1.5px
+    color-mix(in srgb, var(--app-text) 28%, transparent);
   color: transparent;
 }

@@ -106,8 +106,8 @@ export default function Checkout() {
   };
 
   const inputCls =
-    "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40";
-  const cardCls = "bg-white/[0.04] border border-white/10 rounded-2xl p-6";
+    "w-full rounded-xl border border-app bg-card-2 px-3 py-2.5 text-sm text-app placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40";
+  const cardCls = "bg-card border border-app rounded-2xl p-6";
 
   return (
     <div>
@@ -126,7 +126,7 @@ export default function Checkout() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-300">
+                <label className="block text-sm font-medium mb-1 text-soft">
                   Nom complet *
                 </label>
                 <input
@@ -140,7 +140,7 @@ export default function Checkout() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-300">
+                <label className="block text-sm font-medium mb-1 text-soft">
                   Téléphone *
                 </label>
                 <input
@@ -155,7 +155,7 @@ export default function Checkout() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-300">
+                <label className="block text-sm font-medium mb-1 text-soft">
                   Adresse *
                 </label>
                 <input
@@ -169,7 +169,7 @@ export default function Checkout() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-300">
+                <label className="block text-sm font-medium mb-1 text-soft">
                   Ville *
                 </label>
                 <input
@@ -183,7 +183,7 @@ export default function Checkout() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1 text-gray-300">
+                <label className="block text-sm font-medium mb-1 text-soft">
                   Notes (optionnel)
                 </label>
                 <textarea
@@ -212,7 +212,7 @@ export default function Checkout() {
                   className={`flex items-center justify-between border rounded-xl px-4 py-3 cursor-pointer transition ${
                     shipping === value
                       ? "border-orange-500 bg-orange-500/10"
-                      : "border-white/10 hover:bg-white/5"
+                      : "border-app hover-card-2"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -241,7 +241,7 @@ export default function Checkout() {
           <div className="mt-4 space-y-2 text-sm">
             {items.map(({ product, qty }) => (
               <div key={product._id} className="flex justify-between gap-2">
-                <span className="text-gray-400 line-clamp-1">
+                <span className="text-muted line-clamp-1">
                   {product.name} × {qty}
                 </span>
                 <span className="font-medium whitespace-nowrap">
@@ -264,7 +264,7 @@ export default function Checkout() {
                 type="button"
                 onClick={applyPromo}
                 disabled={promoLoading}
-                className="px-4 py-2 rounded-xl border border-white/15 bg-white/5 text-sm font-medium hover:bg-white/10 disabled:opacity-50 transition"
+                className="px-4 py-2 rounded-xl border border-app-strong bg-card-2 text-sm font-medium hover-card-2 disabled:opacity-50 transition"
               >
                 {promoLoading ? "..." : "Appliquer"}
               </button>
@@ -283,9 +283,9 @@ export default function Checkout() {
             )}
           </div>
 
-          <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-sm">
+          <div className="mt-4 pt-4 border-t border-app space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Sous-total</span>
+              <span className="text-muted">Sous-total</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
             {discount > 0 && (
@@ -295,16 +295,16 @@ export default function Checkout() {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-400">Livraison</span>
+              <span className="text-muted">Livraison</span>
               <span>{formatPrice(shippingFee)}</span>
             </div>
-            <div className="flex justify-between font-bold text-base pt-2 border-t border-white/10">
+            <div className="flex justify-between font-bold text-base pt-2 border-t border-app">
               <span>Total</span>
               <span className="text-orange-400">{formatPrice(total)}</span>
             </div>
           </div>
 
-          <div className="mt-4 text-xs text-gray-500">
+          <div className="mt-4 text-xs text-faint">
             Paiement à la livraison (cash ou mobile money).
           </div>
 

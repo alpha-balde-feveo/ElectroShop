@@ -40,7 +40,7 @@ export default function AdminLogin() {
     "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40";
 
   return (
-    <div className="min-h-screen bg-mesh text-white grid place-items-center px-4">
+    <div className="dark-scope min-h-screen bg-mesh text-white grid place-items-center px-4">
       <div className="w-full max-w-sm">
         <Link
           to="/"
