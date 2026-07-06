@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { AxiosError } from "axios";
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { api } from "../api/http";
 import type { Category, Product } from "../types";
 import { buildImageUrl } from "../utils/image";
@@ -29,8 +30,10 @@ const emptyForm: FormState = {
 };
 
 export default function AdminProducts() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,9 +49,8 @@ export default function AdminProducts() {
       ]);
       setProducts(p.data);
       setCategories(c.data);
-    } catch (e: unknown) {
-      const err = e as AxiosError<{ message?: string }>;
-      setError(err.response?.data?.message ?? "Erreur de chargement");
+    } catch {
+      setError("Erreur de chargement");
     } finally {
       setLoading(false);
     }
@@ -57,6 +59,34 @@ export default function AdminProducts() {
   useEffect(() => {
     load();
   }, []);
+
+  // Ouverture via palette / dashboard : ?new=1 ou ?edit=<id>
+  useEffect(() => {
+    if (loading) return;
+
+    if (searchParams.get("new") === "1") {
+      setEditing(null);
+      setShowForm(true);
+      setSearchParams({}, { replace: true });
+    }
+
+    const editId = searchParams.get("edit");
+    if (editId) {
+      const p = products.find((x) => x._id === editId);
+      if (p) {
+        setEditing(p);
+        setShowForm(true);
+      }
+      setSearchParams({}, { replace: true });
+    }
+  }, [loading, searchParams, products, setSearchParams]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q
+      ? products.filter((p) => p.name.toLowerCase().includes(q))
+      : products;
+  }, [products, query]);
 
   const handleDelete = async (p: Product) => {
     if (!confirm(`Supprimer "${p.name}" ?`)) return;
@@ -68,105 +98,71 @@ export default function AdminProducts() {
     }
   };
 
-  const openCreate = () => {
-    setEditing(null);
-    setShowForm(true);
-  };
-
-  const openEdit = (p: Product) => {
-    setEditing(p);
-    setShowForm(true);
-  };
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Produits ({products.length})</h1>
-        <button
-          onClick={openCreate}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-400 text-sm font-semibold transition shadow-lg shadow-orange-500/20"
-        >
-          <Plus size={16} />
-          Nouveau produit
-        </button>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <h1 className="text-3xl md:text-4xl font-extrabold">
+          Produits <span className="text-outline">{products.length}</span>
+        </h1>
+
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher..."
+              className="w-48 md:w-64 rounded-full border border-white/10 bg-white/5 pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40"
+            />
+          </div>
+          <button
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500 text-white hover:bg-orange-400 text-sm font-semibold transition shadow-lg shadow-orange-500/20"
+          >
+            <Plus size={16} />
+            Nouveau
+          </button>
+        </div>
       </div>
 
-      {loading && <div className="text-gray-400">Chargement...</div>}
-      {error && <div className="text-red-400">{error}</div>}
+      {loading && <div className="mt-8 text-gray-400">Chargement...</div>}
+      {error && <div className="mt-8 text-red-400">{error}</div>}
 
-      {!loading && (
-        <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-white/5 text-left text-gray-400">
-              <tr>
-                <th className="px-4 py-3">Produit</th>
-                <th className="px-4 py-3 hidden md:table-cell">Catégorie</th>
-                <th className="px-4 py-3">Prix</th>
-                <th className="px-4 py-3">Stock</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p._id} className="border-t border-white/10 hover:bg-white/[0.03] transition">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={buildImageUrl(p.images?.[0]?.url)}
-                        alt=""
-                        className="h-10 w-10 rounded-lg object-cover bg-white/10"
-                      />
-                      <span className="font-medium line-clamp-1">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-gray-400">
-                    {typeof p.categoryId === "object" && p.categoryId
-                      ? p.categoryId.name
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3 font-medium whitespace-nowrap">
-                    {formatPrice(p.price)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        p.stock <= 3
-                          ? "bg-red-500/15 text-red-400 border border-red-500/30"
-                          : "bg-green-500/15 text-green-400 border border-green-500/30"
-                      }`}
-                    >
-                      {p.stock}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => openEdit(p)}
-                        className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition"
-                        aria-label="Modifier"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p)}
-                        className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition"
-                        aria-label="Supprimer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {products.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                    Aucun produit. Créez-en un !
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {!loading && !error && (
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {visible.map((p) => (
+            <AdminProductCard
+              key={p._id}
+              p={p}
+              onEdit={() => {
+                setEditing(p);
+                setShowForm(true);
+              }}
+              onDelete={() => handleDelete(p)}
+            />
+          ))}
+
+          {/* Carte création */}
+          <button
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="min-h-[260px] rounded-3xl border-2 border-dashed border-white/15 grid place-items-center text-gray-500 hover:border-orange-500/60 hover:text-orange-400 transition"
+          >
+            <span className="flex flex-col items-center gap-3 text-sm font-medium">
+              <span className="h-12 w-12 rounded-full border border-white/15 grid place-items-center">
+                <Plus size={20} />
+              </span>
+              Ajouter un produit
+            </span>
+          </button>
         </div>
       )}
 
@@ -184,6 +180,86 @@ export default function AdminProducts() {
     </div>
   );
 }
+
+function AdminProductCard({
+  p,
+  onEdit,
+  onDelete,
+}: {
+  p: Product;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const category =
+    typeof p.categoryId === "object" && p.categoryId ? p.categoryId.name : null;
+
+  // Jauge de stock (référence : 20 unités = plein)
+  const pct = Math.min(100, (p.stock / 20) * 100);
+  const gauge =
+    p.stock <= 3
+      ? "bg-red-400"
+      : p.stock <= 8
+      ? "bg-yellow-400"
+      : "bg-green-400";
+
+  return (
+    <div className="group relative rounded-3xl border border-white/10 bg-white/[0.03] overflow-hidden hover:border-white/25 hover:-translate-y-1 transition-all duration-300">
+      {/* Image */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-white/5">
+        <img
+          src={buildImageUrl(p.images?.[0]?.url)}
+          alt={p.name}
+          loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+        {category && (
+          <span className="absolute top-3 left-3 text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur text-gray-300 border border-white/10">
+            {category}
+          </span>
+        )}
+
+        {/* Actions au survol */}
+        <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition">
+          <button
+            onClick={onEdit}
+            aria-label="Modifier"
+            className="h-8 w-8 rounded-full bg-black/60 backdrop-blur border border-white/15 grid place-items-center text-gray-300 hover:bg-orange-500 hover:border-orange-500 hover:text-white transition"
+          >
+            <Pencil size={13} />
+          </button>
+          <button
+            onClick={onDelete}
+            aria-label="Supprimer"
+            className="h-8 w-8 rounded-full bg-black/60 backdrop-blur border border-white/15 grid place-items-center text-gray-300 hover:bg-red-500 hover:border-red-500 hover:text-white transition"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      </div>
+
+      {/* Infos */}
+      <div className="p-4">
+        <div className="text-sm font-bold truncate">{p.name}</div>
+        <div className="mt-1 flex items-baseline justify-between gap-2">
+          <span className="font-extrabold text-orange-400 text-sm">
+            {formatPrice(p.price)}
+          </span>
+          <span className="text-[11px] text-gray-500">{p.stock} en stock</span>
+        </div>
+
+        {/* Jauge stock */}
+        <div className="mt-2.5 h-1 rounded-full bg-white/10 overflow-hidden">
+          <div
+            className={`h-full rounded-full ${gauge} transition-all duration-700`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= FORMULAIRE ================= */
 
 function ProductForm({
   product,
@@ -302,17 +378,17 @@ function ProductForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Nom *</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Nom *</label>
             <input className={inputCls} required minLength={2} value={form.name} onChange={set("name")} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Marque</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Marque</label>
             <input className={inputCls} value={form.brand} onChange={set("brand")} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Catégorie *</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Catégorie *</label>
             <select className={inputCls} required value={form.categoryId} onChange={set("categoryId")}>
               <option value="">Choisir...</option>
               {categories.map((c) => (
@@ -324,27 +400,27 @@ function ProductForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Prix (FCFA) *</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Prix (FCFA) *</label>
             <input className={inputCls} required type="number" min={0} value={form.price} onChange={set("price")} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Ancien prix (optionnel)</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Ancien prix (optionnel)</label>
             <input className={inputCls} type="number" min={0} value={form.oldPrice} onChange={set("oldPrice")} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Stock *</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Stock *</label>
             <input className={inputCls} required type="number" min={0} value={form.stock} onChange={set("stock")} />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Description</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Description</label>
             <textarea className={inputCls} rows={3} value={form.description} onChange={set("description")} />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Images</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Images</label>
 
             <div className="flex flex-wrap gap-3">
               {form.images.map((im, i) => (
