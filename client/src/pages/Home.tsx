@@ -334,31 +334,37 @@ function BentoCard({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
+        {/* Lien plein cadre : toute la carte est cliquable */}
+        <Link
+          to={`/product/${p._id}`}
+          aria-label={`Voir ${p.name}`}
+          className="absolute inset-0 z-10"
+        />
+
         {/* Badge réduction */}
         <span
-          className={`absolute top-4 left-4 rounded-full bg-orange-500 font-extrabold text-white shadow-lg ${
+          className={`pointer-events-none absolute top-4 left-4 z-20 rounded-full bg-orange-500 font-extrabold text-white shadow-lg ${
             big ? "text-lg px-5 py-2" : "text-xs px-3 py-1"
           }`}
         >
           -{discount}%
         </span>
 
-        {/* Bouton ajout rapide */}
+        {/* Bouton ajout rapide (au-dessus du lien) */}
         <button
           onClick={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             addItem(p);
           }}
           aria-label="Ajouter au panier"
-          className="absolute top-4 right-4 h-9 w-9 rounded-full bg-white/10 backdrop-blur border border-white/20 grid place-items-center opacity-0 group-hover:opacity-100 hover:bg-orange-500 hover:border-orange-500 transition"
+          className="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-white/10 backdrop-blur border border-white/20 grid place-items-center opacity-0 group-hover:opacity-100 hover:bg-orange-500 hover:border-orange-500 transition"
         >
           <Plus size={16} />
         </button>
 
-        <Link
-          to={`/product/${p._id}`}
-          className="absolute inset-x-0 bottom-0 p-5"
-        >
+        {/* Infos bas de carte (décoratives, le clic passe au lien) */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-5">
           <div
             className={`font-extrabold leading-tight ${
               big ? "text-2xl md:text-3xl" : "text-sm"
@@ -382,7 +388,7 @@ function BentoCard({
               {formatPrice(p.price)}
             </span>
           </div>
-        </Link>
+        </div>
       </div>
     </Tilt3D>
   );
