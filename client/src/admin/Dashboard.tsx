@@ -107,7 +107,7 @@ export default function AdminDashboard() {
         <div>
           <div className="text-sm text-gray-500 capitalize">{today}</div>
           <h1 className="mt-1 text-3xl md:text-4xl font-extrabold">
-            Bonjour 👋<span className="text-outline ml-2">Pilotage</span>
+            Bonjour <span className="text-outline ml-2">Pilotage</span>
           </h1>
         </div>
         <Link

@@ -206,20 +206,45 @@ function escapeXml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Illustration filaire par catégorie (style lucide, viewBox 24x24) */
+const CATEGORY_ART: Record<string, string> = {
+  informatique: `<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M1 20h22"/><path d="M9 20v-3h6v3"/>`,
+  smartphones: `<rect x="7" y="1.5" width="10" height="21" rx="2.5"/><path d="M11 19.5h2"/><path d="M10 4h4"/>`,
+  accessoires: `<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="2.5" y="14" width="4.5" height="7" rx="2"/><rect x="17" y="14" width="4.5" height="7" rx="2"/>`,
+  reseau: `<path d="M2 9a14.5 14.5 0 0 1 20 0"/><path d="M5.5 12.5a9.5 9.5 0 0 1 13 0"/><path d="M9 16a4.8 4.8 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1.4" fill="#ffffff" stroke="none"/>`,
+  gaming: `<rect x="1.5" y="7" width="21" height="11" rx="5.5"/><path d="M7 10.5v4M5 12.5h4"/><circle cx="16" cy="11" r="1.1" fill="#ffffff" stroke="none"/><circle cx="18.8" cy="13.8" r="1.1" fill="#ffffff" stroke="none"/>`,
+};
+
 /** Génère une image SVG locale (servie via /uploads) — aucune dépendance internet. */
-function writeSvg(label: string, brand: string, color: string): string {
+function writeSvg(
+  label: string,
+  brand: string,
+  color: string,
+  category: string
+): string {
   const filename = `demo-${slugify(label)}.svg`;
+  const art = CATEGORY_ART[category] ?? CATEGORY_ART.accessoires;
+
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
-  <rect width="800" height="800" fill="#${color}"/>
-  <rect width="800" height="800" fill="url(#g)"/>
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.12"/>
-      <stop offset="1" stop-color="#000000" stop-opacity="0.25"/>
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.35"/>
     </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <text x="400" y="380" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="bold" fill="#ffffff" text-anchor="middle">${escapeXml(label)}</text>
-  <text x="400" y="440" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#ffffff" fill-opacity="0.75" text-anchor="middle">${escapeXml(brand)}</text>
+  <rect width="800" height="800" fill="#${color}"/>
+  <rect width="800" height="800" fill="url(#g)"/>
+  <circle cx="400" cy="330" r="230" fill="url(#halo)"/>
+  <circle cx="400" cy="330" r="185" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="2" stroke-dasharray="4 10"/>
+  <g transform="translate(400 330) scale(11.5) translate(-12 -12)" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    ${art}
+  </g>
+  <text x="400" y="620" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" fill="#ffffff" text-anchor="middle">${escapeXml(label)}</text>
+  <text x="400" y="668" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#ffffff" fill-opacity="0.7" text-anchor="middle" letter-spacing="4">${escapeXml(brand.toUpperCase())}</text>
 </svg>`;
 
   fs.writeFileSync(path.join(UPLOADS_DIR, filename), svg, "utf8");
@@ -238,7 +263,7 @@ async function seedProducts() {
   let fixed = 0;
 
   for (const p of DEMO_PRODUCTS) {
-    const url = writeSvg(p.label, p.brand, p.color);
+    const url = writeSvg(p.label, p.brand, p.color, p.category);
 
     const existing = await ProductModel.findOne({ name: p.name });
 

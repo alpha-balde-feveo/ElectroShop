@@ -9,6 +9,7 @@ import {
   Search,
   ShoppingBag,
   Store,
+  Tags,
 } from "lucide-react";
 import type React from "react";
 import { api } from "../api/http";
@@ -84,6 +85,13 @@ export default function CommandPalette({
         hint: "Créer",
         icon: <Plus size={16} />,
         run: () => go("/admin/products?new=1"),
+      },
+      {
+        id: "categories",
+        label: "Gérer les catégories",
+        hint: "Créer / renommer",
+        icon: <Tags size={16} />,
+        run: () => go("/admin/products?categories=1"),
       },
       {
         id: "store",

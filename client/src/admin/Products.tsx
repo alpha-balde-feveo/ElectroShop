@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { AxiosError } from "axios";
-import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react";
 import { api } from "../api/http";
 import type { Category, Product } from "../types";
 import { buildImageUrl } from "../utils/image";
 import { formatPrice } from "../utils/format";
+import CategoryManager from "./CategoryManager";
 
 type FormState = {
   name: string;
@@ -39,6 +40,7 @@ export default function AdminProducts() {
 
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
 
   const load = async () => {
     try {
@@ -67,6 +69,11 @@ export default function AdminProducts() {
     if (searchParams.get("new") === "1") {
       setEditing(null);
       setShowForm(true);
+      setSearchParams({}, { replace: true });
+    }
+
+    if (searchParams.get("categories") === "1") {
+      setShowCategories(true);
       setSearchParams({}, { replace: true });
     }
 
@@ -118,6 +125,13 @@ export default function AdminProducts() {
               className="w-48 md:w-64 rounded-full border border-white/10 bg-white/5 pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-orange-500/40"
             />
           </div>
+          <button
+            onClick={() => setShowCategories(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-white/15 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white text-sm font-medium transition"
+          >
+            <Tags size={16} />
+            <span className="hidden sm:inline">Catégories</span>
+          </button>
           <button
             onClick={() => {
               setEditing(null);
@@ -175,6 +189,13 @@ export default function AdminProducts() {
             setShowForm(false);
             load();
           }}
+        />
+      )}
+
+      {showCategories && (
+        <CategoryManager
+          onClose={() => setShowCategories(false)}
+          onChanged={load}
         />
       )}
     </div>
