@@ -465,7 +465,7 @@ export default function Checkout() {
             <div className="p-6">
               <div className="text-center">
                 <div className="font-extrabold tracking-[0.3em] text-app">
-                  GAYESTORE
+                  GAYETECH STORE
                 </div>
                 <div className="text-[11px] text-faint mt-1">
                   Dakar, Sénégal · 77 123 45 67

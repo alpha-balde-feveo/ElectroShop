@@ -71,7 +71,7 @@ export default function AdminLayout() {
             className="flex items-center gap-2.5 font-extrabold tracking-wide text-lg text-white"
           >
             <img src="/favicon.svg" alt="" className="h-8 w-8 rounded-lg" />
-            GAYE<span className="text-orange-500">STORE</span>
+            GAYE<span className="text-orange-500">TECH</span>&nbsp;STORE
             <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-semibold border border-orange-500/30 tracking-normal">
               ADMIN
             </span>

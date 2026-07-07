@@ -69,7 +69,7 @@ export default function OrderSuccess() {
             <MapPin size={18} />
           </span>
           <div className="text-sm">
-            <div className="font-semibold">GayeStore — Dakar</div>
+            <div className="font-semibold">GayeTech Store — Dakar</div>
             <div className="text-muted">
               Ouvert 7j/7, 9h-20h · 77 123 45 67
             </div>

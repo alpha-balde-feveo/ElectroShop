@@ -47,7 +47,7 @@ export default function AdminLogin() {
           className="flex items-center justify-center gap-2.5 font-extrabold tracking-wide text-xl mb-8"
         >
           <img src="/favicon.svg" alt="" className="h-9 w-9 rounded-lg" />
-          GAYE<span className="text-orange-500">STORE</span>
+          GAYE<span className="text-orange-500">TECH</span>&nbsp;STORE
         </Link>
 
         <form

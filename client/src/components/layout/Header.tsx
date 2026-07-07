@@ -20,7 +20,7 @@ export default function Header() {
           className="flex items-center gap-2.5 font-extrabold tracking-wide text-lg text-app"
         >
           <img src="/favicon.svg" alt="" className="h-8 w-8 rounded-lg" />
-          GAYE<span className="text-orange-500">STORE</span>
+          GAYE<span className="text-orange-500">TECH</span>&nbsp;STORE
         </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium">

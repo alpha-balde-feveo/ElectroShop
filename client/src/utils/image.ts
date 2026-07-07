@@ -1,6 +1,6 @@
 export function buildImageUrl(raw?: string): string {
   if (!raw) {
-    return "https://dummyimage.com/800x800/0b0d14/f97316.png&text=GayeStore";
+    return "https://dummyimage.com/800x800/0b0d14/f97316.png&text=GayeTech%20Store";
   }
   if (raw.startsWith("http") || raw.startsWith("data:")) return raw;
 
