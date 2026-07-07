@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Clock,
   ShoppingBag,
+  TrendingDown,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -16,6 +17,14 @@ import { buildImageUrl } from "../utils/image";
 import { StatusBadge } from "./status";
 
 type Stats = { ordersCount: number; revenue: number; lowStock: number };
+
+type DayStat = {
+  label: string; // "lun."
+  dateLabel: string; // "7 juil."
+  total: number;
+  count: number;
+  isToday: boolean;
+};
 
 /** Compteur animé (ease-out cubic) */
 function useCountUp(target: number, duration = 900): number {
@@ -36,11 +45,19 @@ function useCountUp(target: number, duration = 900): number {
   return value;
 }
 
+/** Format compact : 78 000 → "78k", 1 250 000 → "1,3M" */
+function compact(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")}M`;
+  if (n >= 1000) return `${Math.round(n / 1000)}k`;
+  return String(n);
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState(6); // aujourd'hui
 
   useEffect(() => {
     Promise.all([
@@ -56,30 +73,50 @@ export default function AdminDashboard() {
       .catch(() => setError("Erreur de chargement"));
   }, []);
 
-  // CA des 7 derniers jours (hors annulées)
-  const weekSeries = useMemo(() => {
-    const days: { label: string; total: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
+  // CA quotidien : 7 derniers jours + total des 7 jours précédents (hors annulées)
+  const { days, prevTotal } = useMemo(() => {
+    const dayTotal = (offset: number) => {
       const d = new Date();
-      d.setDate(d.getDate() - i);
+      d.setDate(d.getDate() - offset);
       const key = d.toDateString();
-      const total = orders
-        .filter(
-          (o) =>
-            o.status !== "CANCELED" &&
-            o.createdAt &&
-            new Date(o.createdAt).toDateString() === key
-        )
-        .reduce((sum, o) => sum + o.total, 0);
+      const dayOrders = orders.filter(
+        (o) =>
+          o.status !== "CANCELED" &&
+          o.createdAt &&
+          new Date(o.createdAt).toDateString() === key
+      );
+      return {
+        date: d,
+        total: dayOrders.reduce((s, o) => s + o.total, 0),
+        count: dayOrders.length,
+      };
+    };
+
+    const days: DayStat[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const { date, total, count } = dayTotal(i);
       days.push({
-        label: d.toLocaleDateString("fr-FR", { weekday: "short" }),
+        label: date.toLocaleDateString("fr-FR", { weekday: "short" }),
+        dateLabel: date.toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+        }),
         total,
+        count,
+        isToday: i === 0,
       });
     }
-    return days;
+
+    let prevTotal = 0;
+    for (let i = 13; i >= 7; i--) prevTotal += dayTotal(i).total;
+
+    return { days, prevTotal };
   }, [orders]);
 
-  const weekTotal = weekSeries.reduce((s, d) => s + d.total, 0);
+  const weekTotal = days.reduce((s, d) => s + d.total, 0);
+  const trend =
+    prevTotal > 0 ? Math.round(((weekTotal - prevTotal) / prevTotal) * 100) : null;
+
   const pending = orders.filter((o) => o.status === "PENDING").length;
   const lowStockProducts = products
     .filter((p) => p.stock <= 3)
@@ -99,6 +136,8 @@ export default function AdminDashboard() {
     day: "numeric",
     month: "long",
   });
+
+  const sel = days[selectedDay];
 
   return (
     <div>
@@ -120,26 +159,61 @@ export default function AdminDashboard() {
 
       {/* KPIs */}
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Carte CA avec sparkline */}
+        {/* ===== SKYLINE DU CHIFFRE D'AFFAIRES ===== */}
         <div className="sm:col-span-2 relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-orange-500/15 via-white/[0.04] to-white/[0.02] p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-sm text-gray-400 flex items-center gap-2">
               <Wallet size={15} className="text-orange-400" />
               Chiffre d'affaires total
             </span>
-            <span className="text-[11px] text-gray-500 flex items-center gap-1">
-              <TrendingUp size={12} className="text-green-400" />
-              {formatPrice(weekTotal)} / 7 jours
-            </span>
+
+            {/* Tendance vs semaine précédente */}
+            {trend !== null ? (
+              <span
+                className={`text-[11px] font-semibold flex items-center gap-1 px-2 py-1 rounded-full border ${
+                  trend >= 0
+                    ? "text-green-400 bg-green-500/10 border-green-500/30"
+                    : "text-red-400 bg-red-500/10 border-red-500/30"
+                }`}
+              >
+                {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {trend >= 0 ? "+" : ""}
+                {trend}% vs sem. passée
+              </span>
+            ) : (
+              <span className="text-[11px] text-gray-500">
+                {formatPrice(weekTotal)} / 7 jours
+              </span>
+            )}
           </div>
-          <div className="mt-2 text-3xl md:text-4xl font-extrabold tabular-nums">
-            {formatPrice(revenue)}
-          </div>
-          <Sparkline data={weekSeries.map((d) => d.total)} />
-          <div className="mt-1 flex justify-between text-[10px] text-gray-600 uppercase">
-            {weekSeries.map((d, i) => (
-              <span key={i}>{d.label}</span>
-            ))}
+
+          <div className="mt-1 flex flex-col md:flex-row md:items-end gap-4 justify-between">
+            {/* Lecture simple à gauche */}
+            <div className="shrink-0">
+              <div className="text-3xl font-extrabold tabular-nums">
+                {formatPrice(revenue)}
+              </div>
+
+              {/* Détail du jour survolé */}
+              <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 min-w-[180px]">
+                <div className="text-[11px] uppercase tracking-widest text-gray-500 capitalize">
+                  {sel.isToday ? "Aujourd'hui" : `${sel.label} ${sel.dateLabel}`}
+                </div>
+                <div className="mt-0.5 text-lg font-extrabold text-orange-400 tabular-nums">
+                  {formatPrice(sel.total)}
+                </div>
+                <div className="text-[11px] text-gray-500">
+                  {sel.count} commande{sel.count > 1 ? "s" : ""}
+                </div>
+              </div>
+            </div>
+
+            {/* La ville isométrique */}
+            <RevenueSkyline
+              days={days}
+              selected={selectedDay}
+              onSelect={setSelectedDay}
+            />
           </div>
         </div>
 
@@ -264,38 +338,175 @@ export default function AdminDashboard() {
   );
 }
 
-/* Sparkline SVG (aire + ligne) */
-function Sparkline({ data }: { data: number[] }) {
-  const max = Math.max(...data, 1);
-  const W = 100;
-  const H = 32;
-  const step = W / Math.max(1, data.length - 1);
+/* =====================================================================
+   SKYLINE ISOMÉTRIQUE — chaque jour est un immeuble, hauteur = CA du jour.
+   Survolez un immeuble pour lire son détail. Balise pulsante = record.
+   ===================================================================== */
+function RevenueSkyline({
+  days,
+  selected,
+  onSelect,
+}: {
+  days: DayStat[];
+  selected: number;
+  onSelect: (i: number) => void;
+}) {
+  const K = 0.866; // cos(30°)
+  const W = 44; // largeur d'un immeuble
+  const D = 44; // profondeur
+  const GAP = 62; // espacement le long de la rue
+  const HMAX = 120; // hauteur du record
 
-  const points = data
-    .map((v, i) => `${(i * step).toFixed(1)},${(H - (v / max) * (H - 4) - 2).toFixed(1)}`)
-    .join(" ");
+  const max = Math.max(...days.map((d) => d.total), 1);
+  const bestIndex = days.reduce(
+    (best, d, i) => (d.total > days[best].total ? i : best),
+    0
+  );
+  const hasRevenue = days.some((d) => d.total > 0);
+
+  const proj = (x: number, y: number, z: number): [number, number] => [
+    (x - y) * K,
+    (x + y) * 0.5 - z,
+  ];
+
+  type Building = {
+    top: string;
+    front: string;
+    right: string;
+    base: string;
+    labelPos: [number, number];
+    valuePos: [number, number];
+    beaconPos: [number, number];
+    h: number;
+  };
+
+  const pts: [number, number][] = [];
+  const P = (x: number, y: number, z: number): string => {
+    const p = proj(x, y, z);
+    pts.push(p);
+    return `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+  };
+
+  const buildings: Building[] = days.map((d, i) => {
+    const bx = i * GAP;
+    const h = d.total === 0 ? 5 : 16 + (d.total / max) * HMAX;
+
+    // Coins du toit et du sol
+    const top = [P(bx, 0, h), P(bx + W, 0, h), P(bx + W, D, h), P(bx, D, h)].join(" ");
+    const front = [P(bx, D, h), P(bx + W, D, h), P(bx + W, D, 0), P(bx, D, 0)].join(" ");
+    const right = [P(bx + W, 0, h), P(bx + W, D, h), P(bx + W, D, 0), P(bx + W, 0, 0)].join(" ");
+    const m = 7; // marge du socle
+    const base = [
+      P(bx - m, -m, 0),
+      P(bx + W + m, -m, 0),
+      P(bx + W + m, D + m, 0),
+      P(bx - m, D + m, 0),
+    ].join(" ");
+
+    const labelPos = proj(bx + W / 2, D + 22, 0);
+    const valuePos = proj(bx + W / 2, D / 2, h + 14);
+    const beaconPos = proj(bx + W / 2, D / 2, h + 30);
+    pts.push(labelPos, valuePos, beaconPos);
+
+    return { top, front, right, base, labelPos, valuePos, beaconPos, h };
+  });
+
+  // ViewBox ajusté aux points calculés
+  const xs = pts.map((p) => p[0]);
+  const ys = pts.map((p) => p[1]);
+  const minX = Math.min(...xs) - 10;
+  const minY = Math.min(...ys) - 10;
+  const vbW = Math.max(...xs) - minX + 10;
+  const vbH = Math.max(...ys) - minY + 14;
 
   return (
     <svg
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      className="mt-3 h-14 w-full"
+      viewBox={`${minX} ${minY} ${vbW} ${vbH}`}
+      className="w-full md:max-w-[430px] select-none"
+      role="img"
+      aria-label="Chiffre d'affaires par jour, en immeubles"
     >
-      <defs>
-        <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f97316" stopOpacity="0.4" />
-          <stop offset="1" stopColor="#f97316" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={`0,${H} ${points} ${W},${H}`} fill="url(#spark)" />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#fb923c"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {buildings.map((b, i) => {
+        const d = days[i];
+        const active = i === selected;
+        const empty = d.total === 0;
+
+        const topC = empty ? "#334155" : active ? "#fdba74" : "#fb923c";
+        const frontC = empty ? "#1e293b" : active ? "#f97316" : "#ea580c";
+        const rightC = empty ? "#0f172a" : active ? "#c2410c" : "#9a3412";
+
+        return (
+          <g
+            key={i}
+            onMouseEnter={() => onSelect(i)}
+            onClick={() => onSelect(i)}
+            className="cursor-pointer"
+            style={{ opacity: 0, animation: `fade-up 0.5s ease-out ${i * 90}ms forwards` }}
+          >
+            {/* Socle */}
+            <polygon
+              points={b.base}
+              fill={active ? "rgba(249,115,22,0.14)" : "rgba(255,255,255,0.04)"}
+              stroke={active ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.08)"}
+              strokeWidth="1"
+            />
+
+            {/* Immeuble */}
+            <polygon points={b.right} fill={rightC} />
+            <polygon points={b.front} fill={frontC} />
+            <polygon
+              points={b.top}
+              fill={topC}
+              stroke={active ? "#fff" : "transparent"}
+              strokeOpacity="0.4"
+              strokeWidth="1"
+            />
+
+            {/* Montant au sommet */}
+            {!empty && (
+              <text
+                x={b.valuePos[0]}
+                y={b.valuePos[1]}
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="800"
+                fill={active ? "#ffffff" : "#d1d5db"}
+                fontFamily="ui-monospace, monospace"
+              >
+                {compact(d.total)}
+              </text>
+            )}
+
+            {/* Balise du record */}
+            {hasRevenue && i === bestIndex && (
+              <g>
+                <circle
+                  cx={b.beaconPos[0]}
+                  cy={b.beaconPos[1]}
+                  r="4"
+                  fill="#fbbf24"
+                  className="animate-ping"
+                  style={{ transformOrigin: `${b.beaconPos[0]}px ${b.beaconPos[1]}px` }}
+                />
+                <circle cx={b.beaconPos[0]} cy={b.beaconPos[1]} r="2.5" fill="#fbbf24" />
+              </g>
+            )}
+
+            {/* Jour */}
+            <text
+              x={b.labelPos[0]}
+              y={b.labelPos[1]}
+              textAnchor="middle"
+              fontSize="10"
+              fill={d.isToday ? "#fb923c" : active ? "#d1d5db" : "#6b7280"}
+              fontWeight={d.isToday || active ? 700 : 400}
+              className="uppercase"
+            >
+              {d.label}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
