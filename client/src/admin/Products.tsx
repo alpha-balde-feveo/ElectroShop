@@ -8,6 +8,8 @@ import { buildImageUrl } from "../utils/image";
 import { formatPrice } from "../utils/format";
 import CategoryManager from "./CategoryManager";
 
+type SpecRow = { key: string; value: string };
+
 type FormState = {
   name: string;
   brand: string;
@@ -17,6 +19,7 @@ type FormState = {
   description: string;
   stock: string;
   images: { url: string }[];
+  specs: SpecRow[];
 };
 
 const emptyForm: FormState = {
@@ -28,6 +31,7 @@ const emptyForm: FormState = {
   description: "",
   stock: "0",
   images: [],
+  specs: [],
 };
 
 export default function AdminProducts() {
@@ -307,6 +311,13 @@ function ProductForm({
       description: product.description ?? "",
       stock: String(product.stock),
       images: product.images ?? [],
+      specs:
+        product.specs && typeof product.specs === "object"
+          ? Object.entries(product.specs).map(([key, value]) => ({
+              key,
+              value: String(value),
+            }))
+          : [],
     };
   });
   const [saving, setSaving] = useState(false);
@@ -341,8 +352,29 @@ function ProductForm({
   const removeImage = (i: number) =>
     setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }));
 
+  // --- Caractéristiques (clé / valeur) ---
+  const addSpec = () =>
+    setForm((f) => ({ ...f, specs: [...f.specs, { key: "", value: "" }] }));
+
+  const setSpec = (i: number, field: "key" | "value", v: string) =>
+    setForm((f) => ({
+      ...f,
+      specs: f.specs.map((s, idx) => (idx === i ? { ...s, [field]: v } : s)),
+    }));
+
+  const removeSpec = (i: number) =>
+    setForm((f) => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Transforme les lignes clé/valeur en objet, en ignorant les lignes vides
+    const specs: Record<string, string> = {};
+    for (const s of form.specs) {
+      const k = s.key.trim();
+      const v = s.value.trim();
+      if (k && v) specs[k] = v;
+    }
 
     const payload = {
       name: form.name,
@@ -353,6 +385,7 @@ function ProductForm({
       description: form.description,
       stock: Number(form.stock),
       images: form.images,
+      specs,
     };
 
     try {
@@ -438,6 +471,52 @@ function ProductForm({
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1 text-gray-300">Description</label>
             <textarea className={inputCls} rows={3} value={form.description} onChange={set("description")} />
+          </div>
+
+          {/* Caractéristiques */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-1 text-gray-300">
+              Caractéristiques
+              <span className="ml-2 text-xs text-gray-500 font-normal">
+                (affichées sur la page produit — ex : RAM → 8 Go)
+              </span>
+            </label>
+
+            <div className="space-y-2">
+              {form.specs.map((s, i) => (
+                <div key={i} className="flex gap-2">
+                  <input
+                    className={inputCls}
+                    placeholder="Nom (ex : processeur)"
+                    value={s.key}
+                    onChange={(e) => setSpec(i, "key", e.target.value)}
+                  />
+                  <input
+                    className={inputCls}
+                    placeholder="Valeur (ex : Intel Core i5)"
+                    value={s.value}
+                    onChange={(e) => setSpec(i, "value", e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeSpec(i)}
+                    aria-label="Supprimer la caractéristique"
+                    className="shrink-0 h-10 w-10 rounded-xl border border-white/10 bg-white/5 grid place-items-center text-gray-500 hover:bg-red-500/15 hover:text-red-400 transition"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addSpec}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-white/20 text-sm text-gray-500 hover:border-orange-500/60 hover:text-orange-400 transition"
+              >
+                <Plus size={14} />
+                Ajouter une caractéristique
+              </button>
+            </div>
           </div>
 
           <div className="md:col-span-2">
