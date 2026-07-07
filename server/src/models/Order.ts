@@ -14,11 +14,23 @@ const orderSchema = new Schema(
   {
     customerName: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
-    address: { type: String, required: true, trim: true },
-    city: { type: String, required: true, trim: true },
+    // Adresse facultative pour le retrait en boutique
+    address: { type: String, default: "", trim: true },
+    city: { type: String, default: "", trim: true },
     notes: { type: String, default: "", trim: true },
 
     items: { type: [orderItemSchema], required: true },
+
+    shippingMode: {
+      type: String,
+      enum: ["STANDARD", "EXPRESS", "PICKUP"],
+      default: "STANDARD"
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["ON_DELIVERY", "WAVE", "CASH_ON_SITE"],
+      default: "ON_DELIVERY"
+    },
 
     promoCode: { type: String, default: "" },
     subtotal: { type: Number, required: true, min: 0 },

@@ -9,25 +9,66 @@ import { PromoCodeModel } from "../models/PromoCode";
 
 const router = Router();
 
-const createOrderSchema = z.object({
-  customerName: z.string().min(2),
-  phone: z.string().min(6),
-  address: z.string().min(3),
-  city: z.string().min(2),
-  notes: z.string().optional().default(""),
+const createOrderSchema = z
+  .object({
+    customerName: z.string().min(2),
+    phone: z.string().min(6),
+    address: z.string().optional().default(""),
+    city: z.string().optional().default(""),
+    notes: z.string().optional().default(""),
 
-  shipping: z.enum(["STANDARD", "EXPRESS"]).optional().default("STANDARD"),
-  promoCode: z.string().optional().default(""),
+    shipping: z
+      .enum(["STANDARD", "EXPRESS", "PICKUP"])
+      .optional()
+      .default("STANDARD"),
+    paymentMethod: z
+      .enum(["ON_DELIVERY", "WAVE", "CASH_ON_SITE"])
+      .optional()
+      .default("ON_DELIVERY"),
+    promoCode: z.string().optional().default(""),
 
-  items: z
-    .array(
-      z.object({
-        productId: z.string().min(1),
-        qty: z.coerce.number().int().min(1)
-      })
-    )
-    .min(1)
-});
+    items: z
+      .array(
+        z.object({
+          productId: z.string().min(1),
+          qty: z.coerce.number().int().min(1)
+        })
+      )
+      .min(1)
+  })
+  .superRefine((data, ctx) => {
+    // L'adresse n'est requise que pour une livraison
+    if (data.shipping !== "PICKUP") {
+      if (data.address.trim().length < 3) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["address"],
+          message: "Adresse requise pour la livraison"
+        });
+      }
+      if (data.city.trim().length < 2) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["city"],
+          message: "Ville requise pour la livraison"
+        });
+      }
+    }
+    // Wave / espèces sur place uniquement pour le retrait en boutique
+    if (data.shipping === "PICKUP" && data.paymentMethod === "ON_DELIVERY") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["paymentMethod"],
+        message: "Choisissez Wave ou espèces pour un retrait en boutique"
+      });
+    }
+  });
+
+const SHIPPING_FEES: Record<string, number> = {
+  STANDARD: 1500,
+  EXPRESS: 3000,
+  PICKUP: 0
+};
 
 // PUBLIC - create order
 router.post(
@@ -35,7 +76,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const data = createOrderSchema.parse(req.body);
 
-    const shippingFee = data.shipping === "EXPRESS" ? 3000 : 1500;
+    const shippingFee = SHIPPING_FEES[data.shipping] ?? 1500;
 
     const snapshots: any[] = [];
     let subtotal = 0;
@@ -103,6 +144,8 @@ router.post(
       city: data.city,
       notes: data.notes,
       items: snapshots,
+      shippingMode: data.shipping,
+      paymentMethod: data.paymentMethod,
       promoCode,
       subtotal,
       discount,

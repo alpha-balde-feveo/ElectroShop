@@ -30,6 +30,9 @@ export type OrderItem = {
   qty: number;
 };
 
+export type ShippingMode = "STANDARD" | "EXPRESS" | "PICKUP";
+export type PaymentMethod = "ON_DELIVERY" | "WAVE" | "CASH_ON_SITE";
+
 export type Order = {
   _id: string;
   customerName: string;
@@ -38,6 +41,8 @@ export type Order = {
   city: string;
   notes?: string;
   items: OrderItem[];
+  shippingMode?: ShippingMode;
+  paymentMethod?: PaymentMethod;
   promoCode?: string;
   subtotal: number;
   discount: number;

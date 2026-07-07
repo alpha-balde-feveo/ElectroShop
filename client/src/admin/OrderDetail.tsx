@@ -137,12 +137,38 @@ export default function AdminOrderDetail() {
                 {order.phone}
               </a>
             </div>
-            <div>
-              <div className="text-gray-500">Adresse</div>
-              <div className="font-medium">
-                {order.address}, {order.city}
+            {order.shippingMode && (
+              <div>
+                <div className="text-gray-500">Réception</div>
+                <div className="font-medium">
+                  {order.shippingMode === "PICKUP"
+                    ? "🏬 Retrait en boutique"
+                    : order.shippingMode === "EXPRESS"
+                    ? "⚡ Livraison express (24h)"
+                    : "🚚 Livraison standard"}
+                </div>
               </div>
-            </div>
+            )}
+            {order.paymentMethod && (
+              <div>
+                <div className="text-gray-500">Paiement</div>
+                <div className="font-medium">
+                  {order.paymentMethod === "WAVE"
+                    ? "🌊 Wave (QR code)"
+                    : order.paymentMethod === "CASH_ON_SITE"
+                    ? "💵 Espèces sur place"
+                    : "📦 À la livraison"}
+                </div>
+              </div>
+            )}
+            {order.shippingMode !== "PICKUP" && (
+              <div>
+                <div className="text-gray-500">Adresse</div>
+                <div className="font-medium">
+                  {order.address}, {order.city}
+                </div>
+              </div>
+            )}
             {order.notes && (
               <div>
                 <div className="text-gray-500">Notes</div>
