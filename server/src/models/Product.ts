@@ -2,7 +2,9 @@ import mongoose, { Schema, InferSchemaType } from "mongoose";
 
 const productImageSchema = new Schema(
   {
-    url: { type: String, required: true }
+    url: { type: String, required: true },
+    // Libellé de variante (ex : "Bleu", "Rouge", "128 Go")
+    label: { type: String, default: "", trim: true }
   },
   { _id: false }
 );

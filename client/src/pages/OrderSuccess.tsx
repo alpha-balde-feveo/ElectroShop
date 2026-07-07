@@ -1,8 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { CheckCircle, MapPin } from "lucide-react";
+import { CheckCircle, MapPin, Printer } from "lucide-react";
 import type { Order } from "../types";
 import { formatPrice } from "../utils/format";
 import { waveLink, waveQrUrl } from "../utils/wave";
+import { buildInvoiceText, waUrl } from "../utils/whatsapp";
+import InvoicePrint from "../components/InvoicePrint";
 
 const SHIPPING_LABELS: Record<string, string> = {
   STANDARD: "Livraison standard (2-4 jours)",
@@ -144,12 +146,45 @@ export default function OrderSuccess() {
         </div>
       )}
 
+      {/* Facture : PDF + partage WhatsApp */}
+      {order && (
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-app-strong bg-card-2 text-sm font-semibold hover-card-2 transition"
+          >
+            <Printer size={16} />
+            Facture PDF
+          </button>
+          <a
+            href={waUrl(buildInvoiceText(order))}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:brightness-110 transition shadow-lg shadow-green-500/20"
+          >
+            <WhatsAppIcon />
+            Partager sur WhatsApp
+          </a>
+        </div>
+      )}
+
       <Link
         to="/shop"
-        className="inline-block mt-10 px-7 py-3.5 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-400 transition shadow-lg shadow-orange-500/20"
+        className="inline-block mt-8 px-7 py-3.5 rounded-full bg-orange-500 text-white font-semibold hover:bg-orange-400 transition shadow-lg shadow-orange-500/20"
       >
         Retour à la boutique
       </Link>
+
+      {/* Version imprimable (visible uniquement à l'impression) */}
+      {order && <InvoicePrint order={order} />}
     </div>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4 0-.5.2-.7l.5-.7c.1-.2 0-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1.1 2.2-.2 3.7a12 12 0 0 0 4.6 4.3c1.7.8 2.4.9 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0 0-.2-.1-.6-.3z" />
+    </svg>
   );
 }

@@ -18,12 +18,26 @@ import { StatusBadge } from "./status";
 
 type Stats = { ordersCount: number; revenue: number; lowStock: number };
 
+type Period = "week" | "month" | "year";
+
 type DayStat = {
-  label: string; // "lun."
-  dateLabel: string; // "7 juil."
+  label: string; // "lun." / "2 juin" / "juil."
+  dateLabel: string; // libellé complet de la période
   total: number;
   count: number;
-  isToday: boolean;
+  isToday: boolean; // période en cours
+};
+
+const PERIOD_LABELS: Record<Period, string> = {
+  week: "Semaine",
+  month: "Mois",
+  year: "Année",
+};
+
+const TREND_LABELS: Record<Period, string> = {
+  week: "vs sem. passée",
+  month: "vs 6 sem. préc.",
+  year: "vs année préc.",
 };
 
 /** Compteur animé (ease-out cubic) */
@@ -57,7 +71,8 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState(6); // aujourd'hui
+  const [period, setPeriod] = useState<Period>("week");
+  const [selectedDay, setSelectedDay] = useState(6); // période en cours
 
   useEffect(() => {
     Promise.all([
@@ -73,45 +88,104 @@ export default function AdminDashboard() {
       .catch(() => setError("Erreur de chargement"));
   }, []);
 
-  // CA quotidien : 7 derniers jours + total des 7 jours précédents (hors annulées)
+  // CA par période : semaine (7 jours), mois (6 semaines), année (12 mois)
   const { days, prevTotal } = useMemo(() => {
-    const dayTotal = (offset: number) => {
+    const valid = orders.filter(
+      (o) => o.status !== "CANCELED" && o.createdAt
+    );
+
+    // Somme et nombre de commandes sur un intervalle [from, to[
+    const sumRange = (from: Date, to: Date) => {
+      const f = from.getTime();
+      const t = to.getTime();
+      let total = 0;
+      let count = 0;
+      for (const o of valid) {
+        const d = new Date(o.createdAt!).getTime();
+        if (d >= f && d < t) {
+          total += o.total;
+          count++;
+        }
+      }
+      return { total, count };
+    };
+
+    const startOfDay = (offset: number) => {
       const d = new Date();
-      d.setDate(d.getDate() - offset);
-      const key = d.toDateString();
-      const dayOrders = orders.filter(
-        (o) =>
-          o.status !== "CANCELED" &&
-          o.createdAt &&
-          new Date(o.createdAt).toDateString() === key
-      );
-      return {
-        date: d,
-        total: dayOrders.reduce((s, o) => s + o.total, 0),
-        count: dayOrders.length,
-      };
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + offset);
+      return d;
     };
 
     const days: DayStat[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const { date, total, count } = dayTotal(i);
-      days.push({
-        label: date.toLocaleDateString("fr-FR", { weekday: "short" }),
-        dateLabel: date.toLocaleDateString("fr-FR", {
-          day: "numeric",
-          month: "short",
-        }),
-        total,
-        count,
-        isToday: i === 0,
-      });
+    let prevTotal = 0;
+
+    if (period === "week") {
+      for (let i = 6; i >= 0; i--) {
+        const from = startOfDay(-i);
+        const to = startOfDay(-i + 1);
+        const { total, count } = sumRange(from, to);
+        days.push({
+          label: from.toLocaleDateString("fr-FR", { weekday: "short" }),
+          dateLabel: from.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          }),
+          total,
+          count,
+          isToday: i === 0,
+        });
+      }
+      prevTotal = sumRange(startOfDay(-13), startOfDay(-6)).total;
+    } else if (period === "month") {
+      // 6 tranches de 7 jours
+      for (let w = 5; w >= 0; w--) {
+        const from = startOfDay(-(w * 7 + 6));
+        const to = startOfDay(-(w * 7) + 1);
+        const { total, count } = sumRange(from, to);
+        days.push({
+          label: from.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          }),
+          dateLabel: `${from.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          })} → ${new Date(to.getTime() - 1).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+          })}`,
+          total,
+          count,
+          isToday: w === 0,
+        });
+      }
+      prevTotal = sumRange(startOfDay(-83), startOfDay(-41)).total;
+    } else {
+      // 12 derniers mois
+      const now = new Date();
+      for (let m = 11; m >= 0; m--) {
+        const from = new Date(now.getFullYear(), now.getMonth() - m, 1);
+        const to = new Date(now.getFullYear(), now.getMonth() - m + 1, 1);
+        const { total, count } = sumRange(from, to);
+        days.push({
+          label: from.toLocaleDateString("fr-FR", { month: "short" }),
+          dateLabel: from.toLocaleDateString("fr-FR", {
+            month: "long",
+            year: "numeric",
+          }),
+          total,
+          count,
+          isToday: m === 0,
+        });
+      }
+      const prevFrom = new Date(now.getFullYear() - 1, now.getMonth() - 11, 1);
+      const prevTo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+      prevTotal = sumRange(prevFrom, prevTo).total;
     }
 
-    let prevTotal = 0;
-    for (let i = 13; i >= 7; i--) prevTotal += dayTotal(i).total;
-
     return { days, prevTotal };
-  }, [orders]);
+  }, [orders, period]);
 
   const weekTotal = days.reduce((s, d) => s + d.total, 0);
   const trend =
@@ -137,7 +211,13 @@ export default function AdminDashboard() {
     month: "long",
   });
 
-  const sel = days[selectedDay];
+  const sel = days[Math.min(selectedDay, days.length - 1)];
+
+  const changePeriod = (p: Period) => {
+    setPeriod(p);
+    // Sélectionne la période en cours (dernier immeuble)
+    setSelectedDay(p === "year" ? 11 : p === "month" ? 5 : 6);
+  };
 
   return (
     <div>
@@ -161,30 +241,45 @@ export default function AdminDashboard() {
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* ===== SKYLINE DU CHIFFRE D'AFFAIRES ===== */}
         <div className="sm:col-span-2 relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-orange-500/15 via-white/[0.04] to-white/[0.02] p-6">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm text-gray-400 flex items-center gap-2">
               <Wallet size={15} className="text-orange-400" />
-              Chiffre d'affaires total
+              Chiffre d'affaires
             </span>
 
-            {/* Tendance vs semaine précédente */}
-            {trend !== null ? (
-              <span
-                className={`text-[11px] font-semibold flex items-center gap-1 px-2 py-1 rounded-full border ${
-                  trend >= 0
-                    ? "text-green-400 bg-green-500/10 border-green-500/30"
-                    : "text-red-400 bg-red-500/10 border-red-500/30"
-                }`}
-              >
-                {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                {trend >= 0 ? "+" : ""}
-                {trend}% vs sem. passée
-              </span>
-            ) : (
-              <span className="text-[11px] text-gray-500">
-                {formatPrice(weekTotal)} / 7 jours
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {/* Tendance vs période précédente */}
+              {trend !== null && (
+                <span
+                  className={`text-[11px] font-semibold flex items-center gap-1 px-2 py-1 rounded-full border ${
+                    trend >= 0
+                      ? "text-green-400 bg-green-500/10 border-green-500/30"
+                      : "text-red-400 bg-red-500/10 border-red-500/30"
+                  }`}
+                >
+                  {trend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {trend >= 0 ? "+" : ""}
+                  {trend}% {TREND_LABELS[period]}
+                </span>
+              )}
+
+              {/* Sélecteur de période */}
+              <div className="flex rounded-full border border-white/10 bg-white/5 p-0.5">
+                {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => changePeriod(p)}
+                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition ${
+                      period === p
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    {PERIOD_LABELS[p]}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="mt-1 flex flex-col md:flex-row md:items-end gap-4 justify-between">
@@ -193,11 +288,20 @@ export default function AdminDashboard() {
               <div className="text-3xl font-extrabold tabular-nums">
                 {formatPrice(revenue)}
               </div>
+              <div className="text-[11px] text-gray-500 mt-0.5">
+                {formatPrice(weekTotal)} sur la période affichée
+              </div>
 
-              {/* Détail du jour survolé */}
+              {/* Détail de la période survolée */}
               <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 min-w-[180px]">
                 <div className="text-[11px] uppercase tracking-widest text-gray-500 capitalize">
-                  {sel.isToday ? "Aujourd'hui" : `${sel.label} ${sel.dateLabel}`}
+                  {sel.isToday
+                    ? period === "week"
+                      ? "Aujourd'hui"
+                      : "En cours"
+                    : period === "week"
+                    ? `${sel.label} ${sel.dateLabel}`
+                    : sel.dateLabel}
                 </div>
                 <div className="mt-0.5 text-lg font-extrabold text-orange-400 tabular-nums">
                   {formatPrice(sel.total)}

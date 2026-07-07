@@ -90,6 +90,32 @@ option {
   color: var(--app-text);
 }
 
+/* ===== Impression (facture PDF) ===== */
+.print-only {
+  display: none;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+  /* Seule la facture est visible à l'impression */
+  body * {
+    visibility: hidden;
+  }
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
 /* ===== Animations ===== */
 @keyframes float {
   0%,

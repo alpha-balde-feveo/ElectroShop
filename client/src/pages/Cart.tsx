@@ -35,9 +35,9 @@ export default function Cart() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map(({ product, qty }) => (
+          {items.map(({ product, qty, variant }) => (
             <div
-              key={product._id}
+              key={product._id + (variant ?? "")}
               className="bg-card border border-app rounded-2xl p-4 flex gap-4 items-center hover:border-orange-500/30 transition"
             >
               <Link
@@ -58,6 +58,11 @@ export default function Cart() {
                 >
                   {product.name}
                 </Link>
+                {variant && (
+                  <span className="inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 border border-orange-500/30">
+                    {variant}
+                  </span>
+                )}
                 <div className="text-sm text-faint mt-1">
                   {formatPrice(product.price)} / unité
                 </div>
@@ -66,7 +71,7 @@ export default function Cart() {
                   <div className="flex items-center border border-app-strong rounded-lg bg-card-2">
                     <button
                       className="p-2 hover:text-orange-400 disabled:opacity-40 transition"
-                      onClick={() => setQty(product._id, qty - 1)}
+                      onClick={() => setQty(product._id, qty - 1, variant)}
                       disabled={qty <= 1}
                       aria-label="Diminuer"
                     >
@@ -77,7 +82,7 @@ export default function Cart() {
                     </span>
                     <button
                       className="p-2 hover:text-orange-400 disabled:opacity-40 transition"
-                      onClick={() => setQty(product._id, qty + 1)}
+                      onClick={() => setQty(product._id, qty + 1, variant)}
                       disabled={qty >= product.stock}
                       aria-label="Augmenter"
                     >
@@ -86,7 +91,7 @@ export default function Cart() {
                   </div>
 
                   <button
-                    onClick={() => removeItem(product._id)}
+                    onClick={() => removeItem(product._id, variant)}
                     className="text-faint hover:text-red-400 transition"
                     aria-label="Retirer du panier"
                   >

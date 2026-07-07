@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { waContactUrl } from "../../utils/whatsapp";
 
 export default function Footer() {
   return (
@@ -68,6 +69,17 @@ export default function Footer() {
               <Phone size={14} className="text-orange-400" />
               <a href="tel:+221771234567" className="hover:text-orange-400">
                 +221 77 123 45 67
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <MessageCircle size={14} className="text-[#25D366]" />
+              <a
+                href={waContactUrl()}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-[#25D366] transition"
+              >
+                Discuter sur WhatsApp
               </a>
             </li>
             <li className="flex items-center gap-2">

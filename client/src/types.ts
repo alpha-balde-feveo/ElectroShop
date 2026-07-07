@@ -14,13 +14,15 @@ export type Product = {
   description?: string;
   specs?: Record<string, string>;
   stock: number;
-  images: { url: string }[];
+  images: { url: string; label?: string }[];
   createdAt?: string;
 };
 
 export type CartItem = {
   product: Product;
   qty: number;
+  /** Variante choisie (ex : couleur) */
+  variant?: string;
 };
 
 export type OrderItem = {

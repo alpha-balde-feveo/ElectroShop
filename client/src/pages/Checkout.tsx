@@ -127,7 +127,11 @@ export default function Checkout() {
         shipping,
         paymentMethod: payment,
         promoCode: promo?.code ?? "",
-        items: items.map((i) => ({ productId: i.product._id, qty: i.qty })),
+        items: items.map((i) => ({
+          productId: i.product._id,
+          qty: i.qty,
+          variant: i.variant ?? "",
+        })),
       });
 
       clear();
@@ -482,10 +486,14 @@ export default function Checkout() {
               <div className="my-4 border-t border-dashed border-app-strong" />
 
               <div className="space-y-2">
-                {items.map(({ product, qty }) => (
-                  <div key={product._id} className="flex justify-between gap-3">
+                {items.map(({ product, qty, variant }) => (
+                  <div
+                    key={product._id + (variant ?? "")}
+                    className="flex justify-between gap-3"
+                  >
                     <span className="text-muted truncate">
                       {qty}× {product.name}
+                      {variant ? ` (${variant})` : ""}
                     </span>
                     <span className="text-app whitespace-nowrap">
                       {formatPrice(product.price * qty)}

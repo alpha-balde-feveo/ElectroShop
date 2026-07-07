@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { AxiosError } from "axios";
+import { Printer } from "lucide-react";
 import { api } from "../api/http";
 import type { Order } from "../types";
 import { formatPrice } from "../utils/format";
+import { buildInvoiceText, waUrl } from "../utils/whatsapp";
+import InvoicePrint from "../components/InvoicePrint";
 import { STATUS_LABELS, StatusBadge } from "./status";
 
 export default function AdminOrderDetail() {
@@ -49,9 +52,27 @@ export default function AdminOrderDetail() {
         ← Retour aux commandes
       </Link>
 
-      <div className="flex items-center gap-3 mt-2 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mt-2 mb-6">
         <h1 className="text-2xl font-bold">Commande</h1>
         <StatusBadge status={order.status} />
+
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/5 text-sm font-medium hover:bg-white/10 transition"
+          >
+            <Printer size={15} />
+            Facture PDF
+          </button>
+          <a
+            href={waUrl(buildInvoiceText(order), order.phone)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:brightness-110 transition"
+          >
+            📱 Envoyer au client
+          </a>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -186,6 +207,9 @@ export default function AdminOrderDetail() {
           </div>
         </div>
       </div>
+
+      {/* Facture imprimable */}
+      <InvoicePrint order={order} />
     </div>
   );
 }

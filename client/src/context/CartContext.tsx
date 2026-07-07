@@ -6,15 +6,18 @@ type CartContextValue = {
   items: CartItem[];
   count: number;
   subtotal: number;
-  addItem: (product: Product, qty?: number) => void;
-  removeItem: (productId: string) => void;
-  setQty: (productId: string, qty: number) => void;
+  addItem: (product: Product, qty?: number, variant?: string) => void;
+  removeItem: (productId: string, variant?: string) => void;
+  setQty: (productId: string, qty: number, variant?: string) => void;
   clear: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "electroshop_cart";
+
+const sameLine = (i: CartItem, productId: string, variant = "") =>
+  i.product._id === productId && (i.variant ?? "") === variant;
 
 function loadCart(): CartItem[] {
   try {
@@ -34,29 +37,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product, qty = 1) => {
+  const addItem = (product: Product, qty = 1, variant = "") => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.product._id === product._id);
+      const existing = prev.find((i) => sameLine(i, product._id, variant));
       if (existing) {
         return prev.map((i) =>
-          i.product._id === product._id
+          sameLine(i, product._id, variant)
             ? { ...i, qty: Math.min(i.qty + qty, product.stock) }
             : i
         );
       }
-      return [...prev, { product, qty: Math.min(qty, product.stock) }];
+      return [...prev, { product, qty: Math.min(qty, product.stock), variant }];
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((i) => i.product._id !== productId));
+  const removeItem = (productId: string, variant = "") => {
+    setItems((prev) => prev.filter((i) => !sameLine(i, productId, variant)));
   };
 
-  const setQty = (productId: string, qty: number) => {
+  const setQty = (productId: string, qty: number, variant = "") => {
     setItems((prev) =>
       prev
         .map((i) =>
-          i.product._id === productId
+          sameLine(i, productId, variant)
             ? { ...i, qty: Math.max(1, Math.min(qty, i.product.stock)) }
             : i
         )

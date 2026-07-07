@@ -54,10 +54,12 @@ export default function ProductDetail() {
       </div>
     );
 
-  const images = product.images?.length
+  const images: { url: string; label?: string }[] = product.images?.length
     ? product.images
     : [{ url: "" }];
   const mainImg = buildImageUrl(images[imgIndex]?.url);
+  const variant = images[imgIndex]?.label ?? "";
+  const hasVariants = images.some((im) => im.label && im.label.trim() !== "");
   const outOfStock = product.stock <= 0;
   const category =
     typeof product.categoryId === "object" && product.categoryId
@@ -70,7 +72,7 @@ export default function ProductDetail() {
       : [];
 
   const handleAdd = () => {
-    addItem(product, qty);
+    addItem(product, qty, variant);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -96,20 +98,34 @@ export default function ProductDetail() {
           </div>
 
           {images.length > 1 && (
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex gap-2 flex-wrap">
               {images.map((im, i) => (
                 <button
                   key={i}
                   onClick={() => setImgIndex(i)}
-                  className={`h-20 w-20 rounded-xl overflow-hidden border-2 ${
-                    i === imgIndex ? "border-orange-500" : "border-transparent"
+                  title={im.label || `${product.name} ${i + 1}`}
+                  className={`rounded-xl overflow-hidden border-2 transition ${
+                    i === imgIndex
+                      ? "border-orange-500 shadow-lg shadow-orange-500/20"
+                      : "border-transparent opacity-70 hover:opacity-100"
                   }`}
                 >
                   <img
                     src={buildImageUrl(im.url)}
-                    alt={`${product.name} ${i + 1}`}
-                    className="h-full w-full object-cover"
+                    alt={im.label || `${product.name} ${i + 1}`}
+                    className="h-20 w-20 object-cover"
                   />
+                  {im.label && (
+                    <span
+                      className={`block text-[10px] font-semibold py-0.5 text-center ${
+                        i === imgIndex
+                          ? "bg-orange-500 text-white"
+                          : "bg-card-2 text-muted"
+                      }`}
+                    >
+                      {im.label}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -121,7 +137,37 @@ export default function ProductDetail() {
           {category && (
             <div className="text-sm text-orange-400 font-semibold uppercase tracking-widest">{category}</div>
           )}
-          <h1 className="text-3xl font-bold mt-1">{product.name}</h1>
+          <h1 className="text-3xl font-bold mt-1">
+            {product.name}
+            {variant && (
+              <span className="ml-3 align-middle text-sm font-semibold px-3 py-1 rounded-full bg-orange-500/15 text-orange-400 border border-orange-500/30">
+                {variant}
+              </span>
+            )}
+          </h1>
+
+          {/* Choix de variante */}
+          {hasVariants && (
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted">Version :</span>
+              {images.map(
+                (im, i) =>
+                  im.label && (
+                    <button
+                      key={i}
+                      onClick={() => setImgIndex(i)}
+                      className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition ${
+                        i === imgIndex
+                          ? "bg-orange-500 border-orange-500 text-white"
+                          : "border-app-strong text-muted hover-text-app hover:border-orange-500/50"
+                      }`}
+                    >
+                      {im.label}
+                    </button>
+                  )
+              )}
+            </div>
+          )}
           {product.brand && (
             <div className="text-faint mt-1">Marque : {product.brand}</div>
           )}

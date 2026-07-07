@@ -23,7 +23,12 @@ const createSchema = z.object({
   stock: z.coerce.number().int().nonnegative(),
 
   images: z
-    .array(z.object({ url: z.string().min(1) }))
+    .array(
+      z.object({
+        url: z.string().min(1),
+        label: z.string().optional().default("")
+      })
+    )
     .optional()
     .default([])
 });

@@ -31,7 +31,8 @@ const createOrderSchema = z
       .array(
         z.object({
           productId: z.string().min(1),
-          qty: z.coerce.number().int().min(1)
+          qty: z.coerce.number().int().min(1),
+          variant: z.string().optional().default("")
         })
       )
       .min(1)
@@ -102,7 +103,8 @@ router.post(
 
       snapshots.push({
         productId: product._id,
-        nameSnapshot: product.name,
+        nameSnapshot:
+          product.name + (item.variant ? ` — ${item.variant}` : ""),
         priceSnapshot: product.price,
         qty: item.qty
       });

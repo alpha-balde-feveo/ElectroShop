@@ -18,7 +18,7 @@ type FormState = {
   oldPrice: string;
   description: string;
   stock: string;
-  images: { url: string }[];
+  images: { url: string; label?: string }[];
   specs: SpecRow[];
 };
 
@@ -340,7 +340,10 @@ function ProductForm({
       const res = await api.post<{ url: string }>("/api/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setForm((f) => ({ ...f, images: [...f.images, { url: res.data.url }] }));
+      setForm((f) => ({
+        ...f,
+        images: [...f.images, { url: res.data.url, label: "" }],
+      }));
     } catch {
       setError("Échec de l'upload de l'image");
     } finally {
@@ -522,13 +525,31 @@ function ProductForm({
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1 text-gray-300">Images</label>
 
+            <p className="text-xs text-gray-500 mb-2">
+              Ajoutez une image par variante (ex : chaque couleur) et donnez-lui
+              un nom — le client pourra choisir sa version sur la page produit.
+            </p>
+
             <div className="flex flex-wrap gap-3">
               {form.images.map((im, i) => (
-                <div key={i} className="relative">
+                <div key={i} className="relative w-20">
                   <img
                     src={buildImageUrl(im.url)}
                     alt=""
                     className="h-20 w-20 rounded-xl object-cover border border-white/10"
+                  />
+                  <input
+                    value={im.label ?? ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        images: f.images.map((x, idx) =>
+                          idx === i ? { ...x, label: e.target.value } : x
+                        ),
+                      }))
+                    }
+                    placeholder="Couleur..."
+                    className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-1.5 py-1 text-[11px] text-white placeholder-gray-600 outline-none focus:ring-1 focus:ring-orange-500/40 text-center"
                   />
                   <button
                     type="button"
