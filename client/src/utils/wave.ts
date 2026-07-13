@@ -5,7 +5,7 @@
  */
 export function waveLink(amount: number): string {
   const base =
-    (import.meta.env.VITE_WAVE_LINK as string | undefined) ??
+    (import.meta.env.VITE_WAVE_LINK as string | undefined) ||
     "https://pay.wave.com/m/M_CONFIGUREZ_MOI/c/sn/";
   const sep = base.includes("?") ? "&" : "?";
   return `${base}${sep}amount=${amount}`;

@@ -1,25 +1,64 @@
+# ============================================================
+# GayeTech Store — PRODUCTION
+# 3 services : mongo (base) → api (Node/Express) → web (nginx)
+# Seul "web" est exposé au monde extérieur (port 80).
+#
+#   docker compose --env-file .env up -d --build
+#
+# Voir DEPLOYMENT.md pour le guide complet.
+# ============================================================
+
 services:
+  # ---------- Base de données ----------
   mongo:
     image: mongo:7
-    container_name: electroshop-mongo
+    container_name: gayetech-mongo
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    # Aucun port publié : accessible uniquement par l'API
+    # via le réseau interne Docker.
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
+  # ---------- API ----------
   api:
+    build: ./server
+    container_name: gayetech-api
+    restart: unless-stopped
+    environment:
+      PORT: "4000"
+      MONGO_URI: mongodb://mongo:27017/electroshop
+      JWT_SECRET: ${JWT_SECRET:?Définissez JWT_SECRET dans le fichier .env}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Définissez ADMIN_EMAIL dans le fichier .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans le fichier .env}
+    volumes:
+      # Les images produits survivent aux redéploiements
+      - uploads_data:/app/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # ---------- Front (nginx : site + proxy API) ----------
+  web:
     build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: electroshop-api
+      context: ./client
+      args:
+        # Vide = même origine (nginx proxie /api et /uploads vers l'API)
+        VITE_API_URL: ""
+        VITE_WAVE_LINK: ${WAVE_LINK:-}
+        VITE_WHATSAPP_PHONE: ${WHATSAPP_PHONE:-221771234567}
+    container_name: gayetech-web
     restart: unless-stopped
     ports:
-      - "4000:4000"
-    env_file:
-      - ./server/.env
+      - "80:80"
     depends_on:
-      - mongo
+      - api
 
 volumes:
   mongo_data:
+  uploads_data:

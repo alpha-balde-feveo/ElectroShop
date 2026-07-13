@@ -3,7 +3,7 @@ import { formatPrice } from "./format";
 
 /** Numéro WhatsApp de la boutique (configurable via client/.env) */
 export const SHOP_WHATSAPP =
-  (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "221771234567";
+  (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) || "221771234567";
 
 /** Normalise un numéro sénégalais vers le format international wa.me */
 export function toWaPhone(phone: string): string {
