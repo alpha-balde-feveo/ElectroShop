@@ -51,7 +51,7 @@ services:
         # Vide = même origine (nginx proxie /api et /uploads vers l'API)
         VITE_API_URL: ""
         VITE_WAVE_LINK: ${WAVE_LINK:-}
-        VITE_WHATSAPP_PHONE: ${WHATSAPP_PHONE:-221771234567}
+        VITE_WHATSAPP_PHONE: ${WHATSAPP_PHONE:-221773672275}
     container_name: gayetech-web
     restart: unless-stopped
     ports:
