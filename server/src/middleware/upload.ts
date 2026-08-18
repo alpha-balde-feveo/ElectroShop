@@ -1,26 +1,10 @@
 import multer from "multer";
-import path from "path";
-import fs from "fs";
 
-const uploadDir = path.resolve("uploads");
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext).replace(/\s+/g, "_");
-    cb(null, `${Date.now()}-${name}${ext}`);
-  }
-});
-
+// Les fichiers sont gardés en mémoire (buffer) puis envoyés à Cloudinary
+// dans la route — aucune écriture sur le disque local du serveur, donc
+// aucune perte d'image lors d'un redéploiement (disque éphémère sur Render).
 export const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
