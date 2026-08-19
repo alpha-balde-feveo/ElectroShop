@@ -1,5 +1,6 @@
 import type { Order } from "../types";
 import { formatPrice } from "../utils/format";
+import { SHOP_WHATSAPP_DISPLAY } from "../utils/whatsapp";
 
 const SHIPPING_LABELS: Record<string, string> = {
   STANDARD: "Livraison standard",
@@ -31,7 +32,7 @@ export default function InvoicePrint({ order }: { order: Order }) {
             GAYE<span style={{ color: "#f97316" }}>TECH</span> STORE
           </div>
           <div style={{ fontSize: 12, color: "#555", marginTop: 4 }}>
-            Dakar, Sénégal · 77 123 45 67
+            Dakar, Sénégal · {SHOP_WHATSAPP_DISPLAY}
             <br />
             contact@gayetechstore.sn
           </div>

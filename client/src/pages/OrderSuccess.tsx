@@ -3,7 +3,7 @@ import { CheckCircle, MapPin, Printer } from "lucide-react";
 import type { Order } from "../types";
 import { formatPrice } from "../utils/format";
 import { waveLink, waveQrUrl } from "../utils/wave";
-import { buildInvoiceText, waUrl } from "../utils/whatsapp";
+import { buildInvoiceText, SHOP_WHATSAPP_DISPLAY, waUrl } from "../utils/whatsapp";
 import InvoicePrint from "../components/InvoicePrint";
 
 const SHIPPING_LABELS: Record<string, string> = {
@@ -73,7 +73,7 @@ export default function OrderSuccess() {
           <div className="text-sm">
             <div className="font-semibold">GayeTech Store — Dakar</div>
             <div className="text-muted">
-              Ouvert 7j/7, 9h-20h · 77 123 45 67
+              Ouvert 7j/7, 9h-20h · {SHOP_WHATSAPP_DISPLAY}
             </div>
           </div>
         </div>

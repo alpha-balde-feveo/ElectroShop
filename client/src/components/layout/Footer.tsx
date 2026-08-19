@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
-import { waContactUrl } from "../../utils/whatsapp";
+import {
+  SHOP_WHATSAPP_DISPLAY,
+  SHOP_WHATSAPP_TEL,
+  waContactUrl,
+} from "../../utils/whatsapp";
 
 export default function Footer() {
   return (
@@ -67,8 +71,8 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-2">
               <Phone size={14} className="text-orange-400" />
-              <a href="tel:+221771234567" className="hover:text-orange-400">
-                +221 77 123 45 67
+              <a href={`tel:${SHOP_WHATSAPP_TEL}`} className="hover:text-orange-400">
+                {SHOP_WHATSAPP_DISPLAY}
               </a>
             </li>
             <li className="flex items-center gap-2">

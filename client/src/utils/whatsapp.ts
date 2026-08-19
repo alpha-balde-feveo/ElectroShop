@@ -5,6 +5,20 @@ import { formatPrice } from "./format";
 export const SHOP_WHATSAPP =
   (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) || "221773672275";
 
+/** Numéro formaté pour l'affichage : +221 77 367 22 75 */
+export function formatPhoneDisplay(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  const local = digits.startsWith("221") ? digits.slice(3) : digits;
+  if (local.length !== 9) return `+${digits}`;
+  return `+221 ${local.slice(0, 2)} ${local.slice(2, 5)} ${local.slice(5, 7)} ${local.slice(7, 9)}`;
+}
+
+/** Numéro de la boutique, formaté pour l'affichage (footer, factures, etc.) */
+export const SHOP_WHATSAPP_DISPLAY = formatPhoneDisplay(SHOP_WHATSAPP);
+
+/** Numéro de la boutique, pour un lien tel: */
+export const SHOP_WHATSAPP_TEL = `+${SHOP_WHATSAPP}`;
+
 /** Normalise un numéro sénégalais vers le format international wa.me */
 export function toWaPhone(phone: string): string {
   let digits = phone.replace(/\D/g, "");
@@ -77,7 +91,10 @@ export function buildInvoiceText(order: Order): string {
     );
   lines.push(`Livraison : ${formatPrice(order.shippingFee)}`);
   lines.push("", `💰 *TOTAL : ${formatPrice(order.total)}*`, "");
-  lines.push("Merci pour votre confiance ! 🙏", "GayeTech Store — Dakar · 77 123 45 67");
+  lines.push(
+    "Merci pour votre confiance ! 🙏",
+    `GayeTech Store — Dakar · ${SHOP_WHATSAPP_DISPLAY}`
+  );
 
   return lines.join("\n");
 }

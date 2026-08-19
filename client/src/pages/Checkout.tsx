@@ -17,6 +17,7 @@ import { useCart } from "../context/CartContext";
 import { formatPrice } from "../utils/format";
 import type { Order, PaymentMethod, PromoInfo, ShippingMode } from "../types";
 import { waveQrUrl } from "../utils/wave";
+import { SHOP_WHATSAPP_DISPLAY } from "../utils/whatsapp";
 
 const SHIPPING_FEES: Record<ShippingMode, number> = {
   STANDARD: 1500,
@@ -472,7 +473,7 @@ export default function Checkout() {
                   GAYETECH STORE
                 </div>
                 <div className="text-[11px] text-faint mt-1">
-                  Dakar, Sénégal · 77 123 45 67
+                  Dakar, Sénégal · {SHOP_WHATSAPP_DISPLAY}
                 </div>
                 <div className="text-[11px] text-faint">
                   {new Date().toLocaleDateString("fr-FR")}{" "}
