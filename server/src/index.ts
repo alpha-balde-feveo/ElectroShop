@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth";
 import { seedAdmin } from "./seed/seedAdmin";
@@ -23,10 +24,15 @@ import { connectDB } from "./config/db";
 
 const app = express();
 
+// Render (et Vercel) sont derrière un reverse proxy : nécessaire pour que
+// express-rate-limit et req.ip lisent la vraie IP du client via X-Forwarded-For.
+app.set("trust proxy", 1);
+
 const corsOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:5173")
   .split(",")
   .map((o) => o.trim());
 
+app.use(helmet());
 app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(express.json());
 app.use("/api/auth", authRoutes);

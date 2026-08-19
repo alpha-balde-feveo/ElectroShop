@@ -1,13 +1,23 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { AdminUserModel } from "../models/AdminUser";
 import { adminAuth } from "../middleware/adminAuth";
 
 
 const router = Router();
 
-router.post("/login", async (req, res) => {
+// 10 tentatives / 15 min par IP — freine le bruteforce sur le mot de passe admin.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de tentatives de connexion, réessayez dans 15 minutes." }
+});
+
+router.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {

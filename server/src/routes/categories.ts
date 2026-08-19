@@ -16,10 +16,6 @@ router.post("/", adminAuth, async (req, res) => {
     name: z.string().min(2)
   });
 
-  // 🔎 DEBUG TEMPORAIRE
-  console.log("HEADERS:", req.headers["content-type"]);
-  console.log("BODY:", req.body);
-
   const { name } = schema.parse(req.body);
 
   const slug = slugify(name);
