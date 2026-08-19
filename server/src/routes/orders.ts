@@ -134,29 +134,59 @@ router.post(
 
     const total = subtotal - discount + shippingFee;
 
-    // Stock decrement (simple)
-    for (const s of snapshots) {
-      await ProductModel.findByIdAndUpdate(s.productId, { $inc: { stock: -s.qty } });
+    // Décrément atomique du stock, article par article : la condition
+    // stock >= qty est vérifiée par MongoDB au moment même du $inc, ce qui
+    // évite la survente si deux commandes concurrentes visent le dernier
+    // exemplaire (contrairement à un simple check puis update séparés).
+    const decremented: { productId: mongoose.Types.ObjectId; qty: number }[] = [];
+
+    async function rollbackStock() {
+      for (const d of decremented) {
+        await ProductModel.findByIdAndUpdate(d.productId, { $inc: { stock: d.qty } });
+      }
     }
 
-    const order = await OrderModel.create({
-      customerName: data.customerName,
-      phone: data.phone,
-      address: data.address,
-      city: data.city,
-      notes: data.notes,
-      items: snapshots,
-      shippingMode: data.shipping,
-      paymentMethod: data.paymentMethod,
-      promoCode,
-      subtotal,
-      discount,
-      shippingFee,
-      total,
-      status: "PENDING"
-    });
+    for (const s of snapshots) {
+      const updated = await ProductModel.findOneAndUpdate(
+        { _id: s.productId, stock: { $gte: s.qty } },
+        { $inc: { stock: -s.qty } }
+      );
 
-    res.status(201).json(order);
+      if (!updated) {
+        await rollbackStock();
+        res
+          .status(409)
+          .json({ message: `Stock épuisé entre-temps pour ${s.nameSnapshot}` });
+        return;
+      }
+
+      decremented.push({ productId: s.productId, qty: s.qty });
+    }
+
+    try {
+      const order = await OrderModel.create({
+        customerName: data.customerName,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        notes: data.notes,
+        items: snapshots,
+        shippingMode: data.shipping,
+        paymentMethod: data.paymentMethod,
+        promoCode,
+        subtotal,
+        discount,
+        shippingFee,
+        total,
+        status: "PENDING"
+      });
+
+      res.status(201).json(order);
+    } catch (err) {
+      // La commande n'a pas pu être créée : on restitue le stock décrémenté.
+      await rollbackStock();
+      throw err;
+    }
   })
 );
 
