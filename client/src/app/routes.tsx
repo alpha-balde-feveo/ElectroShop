@@ -6,6 +6,7 @@ import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import OrderSuccess from "../pages/OrderSuccess";
+import TrackOrder from "../pages/TrackOrder";
 import AdminLogin from "../admin/AdminLogin";
 import AdminLayout from "../admin/AdminLayout";
 import AdminDashboard from "../admin/Dashboard";
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "/cart", element: <Cart /> },
       { path: "/checkout", element: <Checkout /> },
       { path: "/order-success", element: <OrderSuccess /> },
+      { path: "/suivre-commande", element: <TrackOrder /> },
     ],
   },
   { path: "/admin/login", element: <AdminLogin /> },

@@ -46,6 +46,8 @@ export type Order = {
   shippingMode?: ShippingMode;
   paymentMethod?: PaymentMethod;
   promoCode?: string;
+  /** Code à 6 chiffres pour le retrait en boutique (présent seulement si shippingMode === "PICKUP") */
+  pickupCode?: string;
   subtotal: number;
   discount: number;
   shippingFee: number;

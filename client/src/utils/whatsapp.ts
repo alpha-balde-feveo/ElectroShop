@@ -74,6 +74,8 @@ export function buildInvoiceText(order: Order): string {
     lines.push(`Réception : ${SHIPPING_LABELS[order.shippingMode] ?? ""}`);
   if (order.paymentMethod)
     lines.push(`Paiement : ${PAYMENT_LABELS[order.paymentMethod] ?? ""}`);
+  if (order.shippingMode === "PICKUP" && order.pickupCode)
+    lines.push("", `🔑 Code de retrait : *${order.pickupCode}*`);
 
   lines.push("", "— — — — — — — — — —");
   for (const it of order.items) {

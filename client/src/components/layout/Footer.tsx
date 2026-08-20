@@ -58,6 +58,14 @@ export default function Footer() {
                 Commander
               </Link>
             </li>
+            <li>
+              <Link
+                to="/suivre-commande"
+                className="hover:text-orange-400 transition"
+              >
+                Suivre ma commande
+              </Link>
+            </li>
           </ul>
         </div>
 

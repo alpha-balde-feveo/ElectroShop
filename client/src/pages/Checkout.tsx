@@ -18,6 +18,7 @@ import { formatPrice } from "../utils/format";
 import type { Order, PaymentMethod, PromoInfo, ShippingMode } from "../types";
 import { waveQrUrl } from "../utils/wave";
 import { SHOP_WHATSAPP_DISPLAY } from "../utils/whatsapp";
+import { isValidSenegalPhone, phoneErrorMessage } from "../utils/phone";
 
 const SHIPPING_FEES: Record<ShippingMode, number> = {
   STANDARD: 1500,
@@ -93,7 +94,8 @@ export default function Checkout() {
   const stepValid = () => {
     if (step === 0) return true;
     if (step === 1) {
-      const base = form.customerName.trim().length >= 2 && form.phone.trim().length >= 6;
+      const base =
+        form.customerName.trim().length >= 2 && isValidSenegalPhone(form.phone);
       if (isPickup) return base;
       return base && form.address.trim().length >= 3 && form.city.trim().length >= 2;
     }
@@ -270,12 +272,21 @@ export default function Checkout() {
                     Téléphone *
                   </label>
                   <input
-                    className={inputCls}
+                    className={`${inputCls} ${
+                      form.phone && !isValidSenegalPhone(form.phone)
+                        ? "border-red-500/60 focus:ring-red-500/40"
+                        : ""
+                    }`}
                     type="tel"
                     value={form.phone}
                     onChange={set("phone")}
                     placeholder="77 123 45 67"
                   />
+                  {form.phone && !isValidSenegalPhone(form.phone) && (
+                    <p className="mt-1 text-xs text-red-400">
+                      {phoneErrorMessage(form.phone)}
+                    </p>
+                  )}
                 </div>
 
                 {!isPickup && (

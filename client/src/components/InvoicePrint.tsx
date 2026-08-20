@@ -62,6 +62,15 @@ export default function InvoicePrint({ order }: { order: Order }) {
         {" · "}
         <strong>Paiement :</strong>{" "}
         {PAYMENT_LABELS[order.paymentMethod ?? "ON_DELIVERY"]}
+        {order.shippingMode === "PICKUP" && order.pickupCode && (
+          <>
+            <br />
+            <strong>Code de retrait :</strong>{" "}
+            <span style={{ fontFamily: "monospace", fontSize: 15, fontWeight: 700 }}>
+              {order.pickupCode}
+            </span>
+          </>
+        )}
       </div>
 
       {/* Articles */}

@@ -33,6 +33,9 @@ const orderSchema = new Schema(
     },
 
     promoCode: { type: String, default: "" },
+    // Code à 6 chiffres, généré uniquement pour le retrait en boutique :
+    // vérifié par le staff avant de remettre la commande au client.
+    pickupCode: { type: String },
     subtotal: { type: Number, required: true, min: 0 },
     discount: { type: Number, required: true, min: 0 },
     shippingFee: { type: Number, required: true, min: 0 },

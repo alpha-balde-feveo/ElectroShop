@@ -170,6 +170,16 @@ export default function AdminOrderDetail() {
                 </div>
               </div>
             )}
+            {order.shippingMode === "PICKUP" && order.pickupCode && (
+              <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 px-3 py-2.5">
+                <div className="text-orange-400 text-xs font-semibold">
+                  Code de retrait à vérifier
+                </div>
+                <div className="text-2xl font-mono font-extrabold tracking-[0.2em] mt-0.5">
+                  {order.pickupCode}
+                </div>
+              </div>
+            )}
             {order.paymentMethod && (
               <div>
                 <div className="text-gray-500">Paiement</div>

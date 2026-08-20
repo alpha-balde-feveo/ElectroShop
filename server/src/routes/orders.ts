@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
+import rateLimit from "express-rate-limit";
 import { adminAuth } from "../middleware/adminAuth";
 import { OrderModel } from "../models/Order";
 import { ProductModel } from "../models/Product";
@@ -9,10 +10,40 @@ import { PromoCodeModel } from "../models/PromoCode";
 
 const router = Router();
 
+/** Numéro sénégalais : 9 chiffres commençant par 7, indicatif 221 optionnel. */
+function isValidSenegalPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, "");
+  const local = digits.startsWith("221") ? digits.slice(3) : digits;
+  return /^7\d{8}$/.test(local);
+}
+
+function localPhoneDigits(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  return digits.startsWith("221") ? digits.slice(3) : digits;
+}
+
+/** Code de retrait à 6 chiffres, non-devinable, vérifié par le staff en boutique. */
+function generatePickupCode(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+// 20 recherches / 15 min par IP — évite l'énumération automatisée de commandes.
+const lookupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Trop de tentatives, réessayez dans quelques minutes." }
+});
+
 const createOrderSchema = z
   .object({
     customerName: z.string().min(2),
-    phone: z.string().min(6),
+    phone: z
+      .string()
+      .refine(isValidSenegalPhone, {
+        message: "Numéro de téléphone invalide (9 chiffres, ex : 77 123 45 67)"
+      }),
     address: z.string().optional().default(""),
     city: z.string().optional().default(""),
     notes: z.string().optional().default(""),
@@ -178,7 +209,8 @@ router.post(
         discount,
         shippingFee,
         total,
-        status: "PENDING"
+        status: "PENDING",
+        pickupCode: data.shipping === "PICKUP" ? generatePickupCode() : undefined
       });
 
       res.status(201).json(order);
@@ -187,6 +219,43 @@ router.post(
       await rollbackStock();
       throw err;
     }
+  })
+);
+
+// PUBLIC - retrouver sa commande (référence courte + téléphone)
+router.post(
+  "/lookup",
+  lookupLimiter,
+  asyncHandler(async (req, res) => {
+    const schema = z.object({
+      reference: z.string().min(4),
+      phone: z.string().min(4)
+    });
+    const { reference, phone } = schema.parse(req.body);
+
+    const ref = reference.replace(/\s/g, "").toUpperCase();
+    const phoneLocal = localPhoneDigits(phone);
+
+    // La référence courte = les 8 derniers caractères de l'_id Mongo
+    // (celle affichée sur la confirmation / la facture WhatsApp).
+    const candidates = await OrderModel.aggregate([
+      { $addFields: { idStr: { $toUpper: { $toString: "$_id" } } } },
+      { $match: { idStr: { $regex: `${ref}$` } } }
+    ]);
+
+    const match = candidates.find(
+      (o) => localPhoneDigits(String(o.phone)) === phoneLocal
+    );
+
+    if (!match) {
+      res.status(404).json({
+        message: "Commande introuvable. Vérifiez le numéro de commande et le téléphone."
+      });
+      return;
+    }
+
+    const order = await OrderModel.findById(match._id);
+    res.json(order);
   })
 );
 
