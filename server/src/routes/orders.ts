@@ -94,6 +94,16 @@ const createOrderSchema = z
         message: "Choisissez Wave ou espèces pour un retrait en boutique"
       });
     }
+    // TODO: réactiver une fois l'intégration Wave Checkout API finalisée
+    // (webhook de confirmation de paiement) — pour l'instant le paiement
+    // Wave n'est qu'un QR statique, non vérifié côté serveur.
+    if (data.paymentMethod === "WAVE") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["paymentMethod"],
+        message: "Le paiement Wave n'est pas encore disponible"
+      });
+    }
   });
 
 const SHIPPING_FEES: Record<string, number> = {

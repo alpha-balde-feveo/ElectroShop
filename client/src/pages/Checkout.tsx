@@ -19,6 +19,7 @@ import type { Order, PaymentMethod, PromoInfo, ShippingMode } from "../types";
 import { waveQrUrl } from "../utils/wave";
 import { SHOP_WHATSAPP_DISPLAY } from "../utils/whatsapp";
 import { isValidSenegalPhone, phoneErrorMessage } from "../utils/phone";
+import { saveRecentOrder } from "../utils/orderHistory";
 
 const SHIPPING_FEES: Record<ShippingMode, number> = {
   STANDARD: 1500,
@@ -88,7 +89,9 @@ export default function Checkout() {
 
   const chooseShipping = (mode: ShippingMode) => {
     setShipping(mode);
-    setPayment(mode === "PICKUP" ? "WAVE" : "ON_DELIVERY");
+    // Wave (QR) temporairement désactivé le temps de finaliser l'intégration —
+    // espèces sur place par défaut pour le retrait en boutique.
+    setPayment(mode === "PICKUP" ? "CASH_ON_SITE" : "ON_DELIVERY");
   };
 
   const stepValid = () => {
@@ -135,6 +138,14 @@ export default function Checkout() {
           qty: i.qty,
           variant: i.variant ?? "",
         })),
+      });
+
+      saveRecentOrder({
+        reference: res.data._id.slice(-8).toUpperCase(),
+        phone: res.data.phone,
+        customerName: res.data.customerName,
+        total: res.data.total,
+        createdAt: res.data.createdAt ?? new Date().toISOString(),
       });
 
       clear();
@@ -350,8 +361,10 @@ export default function Checkout() {
                 {isPickup ? (
                   <>
                     <PayCard
-                      active={payment === "WAVE"}
-                      onClick={() => setPayment("WAVE")}
+                      active={false}
+                      onClick={() => {}}
+                      disabled
+                      badge="Bientôt disponible"
                       icon={<WaveLogo />}
                       title="Wave — QR code"
                       desc="Scannez le QR avec l'app Wave et payez en 10 secondes."
@@ -625,26 +638,34 @@ function PayCard({
   icon,
   title,
   desc,
+  disabled = false,
+  badge,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   title: string;
   desc: string;
+  disabled?: boolean;
+  badge?: string;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      aria-disabled={disabled}
       className={`w-full flex items-center gap-4 text-left rounded-2xl border p-4 transition ${
-        active
+        disabled
+          ? "border-app bg-card opacity-50 cursor-not-allowed"
+          : active
           ? "border-orange-500 bg-orange-500/10"
           : "border-app bg-card hover:border-app-strong"
       }`}
     >
       <span
         className={`h-11 w-11 shrink-0 rounded-xl grid place-items-center ${
-          active ? "bg-orange-500 text-white" : "bg-card-2 text-muted"
+          !disabled && active ? "bg-orange-500 text-white" : "bg-card-2 text-muted"
         }`}
       >
         {icon}
@@ -653,13 +674,19 @@ function PayCard({
         <span className="block font-bold">{title}</span>
         <span className="block text-xs text-muted">{desc}</span>
       </span>
-      <span
-        className={`ml-auto h-5 w-5 shrink-0 rounded-full border grid place-items-center ${
-          active ? "border-orange-500 bg-orange-500 text-white" : "border-app-strong"
-        }`}
-      >
-        {active && <Check size={12} />}
-      </span>
+      {disabled ? (
+        <span className="ml-auto shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-card-2 text-faint border border-app">
+          {badge ?? "Bientôt"}
+        </span>
+      ) : (
+        <span
+          className={`ml-auto h-5 w-5 shrink-0 rounded-full border grid place-items-center ${
+            active ? "border-orange-500 bg-orange-500 text-white" : "border-app-strong"
+          }`}
+        >
+          {active && <Check size={12} />}
+        </span>
+      )}
     </button>
   );
 }

@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { AxiosError } from "axios";
-import { Search } from "lucide-react";
+import { Clock, Search } from "lucide-react";
 import { api } from "../api/http";
 import type { Order } from "../types";
+import { formatPrice } from "../utils/format";
+import { loadRecentOrders } from "../utils/orderHistory";
+import type { RecentOrder } from "../utils/orderHistory";
+import { waContactUrl } from "../utils/whatsapp";
 import OrderResult from "../components/OrderResult";
 
 export default function TrackOrder() {
@@ -12,17 +16,21 @@ export default function TrackOrder() {
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [recent, setRecent] = useState<RecentOrder[]>([]);
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    setRecent(loadRecentOrders());
+  }, []);
+
+  const lookup = async (ref: string, tel: string) => {
     setLoading(true);
     setError(null);
     setOrder(null);
 
     try {
       const res = await api.post<Order>("/api/orders/lookup", {
-        reference: reference.trim(),
-        phone: phone.trim(),
+        reference: ref.trim(),
+        phone: tel.trim(),
       });
       setOrder(res.data);
     } catch (e: unknown) {
@@ -34,6 +42,11 @@ export default function TrackOrder() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    lookup(reference, phone);
   };
 
   const inputCls =
@@ -48,6 +61,39 @@ export default function TrackOrder() {
         Entrez le numéro de commande (reçu sur la page de confirmation ou dans
         la facture WhatsApp) et le téléphone utilisé lors de la commande.
       </p>
+
+      {/* Commandes récentes mémorisées sur cet appareil */}
+      {recent.length > 0 && !order && (
+        <div className="mt-8 bg-card border border-app rounded-2xl p-4 text-left">
+          <div className="flex items-center gap-2 text-sm font-semibold text-soft">
+            <Clock size={15} />
+            Vos commandes récentes sur cet appareil
+          </div>
+          <div className="mt-3 space-y-2">
+            {recent.map((r) => (
+              <button
+                key={r.reference}
+                onClick={() => lookup(r.reference, r.phone)}
+                disabled={loading}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-app bg-card-2 hover-card-2 text-sm transition disabled:opacity-50"
+              >
+                <span>
+                  <span className="font-mono font-semibold">{r.reference}</span>
+                  <span className="text-muted">
+                    {" "}
+                    ·{" "}
+                    {new Date(r.createdAt).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </span>
+                </span>
+                <span className="font-medium">{formatPrice(r.total)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <form
         onSubmit={submit}
@@ -78,7 +124,23 @@ export default function TrackOrder() {
           />
         </div>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <div className="text-sm text-red-400">
+            {error}
+            <div className="mt-2 text-muted">
+              Vous ne retrouvez pas votre numéro de commande ?{" "}
+              <a
+                href={waContactUrl()}
+                target="_blank"
+                rel="noreferrer"
+                className="text-orange-400 underline underline-offset-4"
+              >
+                Contactez-nous sur WhatsApp
+              </a>{" "}
+              avec votre nom, on la retrouvera pour vous.
+            </div>
+          </div>
+        )}
 
         <button
           type="submit"

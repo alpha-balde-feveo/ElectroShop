@@ -39,7 +39,7 @@ export function waUrl(text: string, phone?: string): string {
 /** Message de contact standard de la boutique */
 export function waContactUrl(): string {
   return waUrl(
-    "Bonjour GayeTech Store 👋 J'ai une question sur vos produits.",
+    "Bonjour GayeTech Store, J'ai une question sur vos produits.",
     SHOP_WHATSAPP
   );
 }
