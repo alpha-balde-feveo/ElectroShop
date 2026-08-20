@@ -68,11 +68,18 @@ export default function AdminLayout() {
           {/* Logo */}
           <Link
             to="/admin"
-            className="flex items-center gap-2.5 font-extrabold tracking-wide text-lg text-white"
+            className="flex items-center gap-2 sm:gap-2.5 font-extrabold tracking-wide text-base sm:text-lg text-white min-w-0"
           >
-            <img src="/favicon.svg" alt="" className="h-8 w-8 rounded-lg" />
-            GAYE<span className="text-orange-500">TECH</span>&nbsp;STORE
-            <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-semibold border border-orange-500/30 tracking-normal">
+            <img
+              src="/favicon.svg"
+              alt=""
+              className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg shrink-0"
+            />
+            <span className="truncate">
+              GAYE<span className="text-orange-500">TECH</span>
+              <span className="hidden sm:inline">&nbsp;STORE</span>
+            </span>
+            <span className="hidden sm:inline-block shrink-0 ml-1 text-[10px] px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-semibold border border-orange-500/30 tracking-normal">
               ADMIN
             </span>
           </Link>
@@ -91,11 +98,11 @@ export default function AdminLayout() {
           </nav>
 
           {/* Actions à droite */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setPaletteOpen(true)}
               aria-label="Recherche (⌘K)"
-              className="relative px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm inline-flex items-center gap-2 transition"
+              className="relative px-2.5 sm:px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm inline-flex items-center gap-2 transition"
             >
               <Command size={16} />
               <kbd className="hidden sm:inline text-[10px] border border-white/15 rounded px-1.5 py-0.5 text-gray-500">
@@ -106,7 +113,7 @@ export default function AdminLayout() {
             <Link
               to="/"
               aria-label="Voir la boutique"
-              className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm inline-flex items-center transition"
+              className="px-2.5 sm:px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm inline-flex items-center transition"
             >
               <Store size={16} />
             </Link>
@@ -114,7 +121,7 @@ export default function AdminLayout() {
             <button
               onClick={logout}
               aria-label="Déconnexion"
-              className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 text-white text-sm inline-flex items-center transition hover:bg-red-500/15 hover:border-red-500/40 hover:text-red-400"
+              className="px-2.5 sm:px-3 py-2 rounded-xl border border-white/15 bg-white/5 text-white text-sm inline-flex items-center transition hover:bg-red-500/15 hover:border-red-500/40 hover:text-red-400"
             >
               <LogOut size={16} />
             </button>
